@@ -1,0 +1,909 @@
+{
+	"folders": [
+		{
+			"name": "bh3d",
+			"path": "."
+		},
+		{
+			"name": "UE5",
+			"path": "/home/fast/unreal/opt/unreal-engine"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off",
+		"npm.autoDetect": "off",
+		"terminal.integrated.env.linux": {
+			"PATH": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64:${env:PATH}",
+			"DOTNET_ROOT": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64",
+			"DOTNET_HOST_PATH": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64/dotnet",
+			"DOTNET_MULTILEVEL_LOOKUP": "0",
+			"DOTNET_ROLL_FORWARD": "LatestMajor"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "bh3d Linux Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d Linux Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d Linux DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d Linux Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Test Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Test",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Test Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Test",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d Linux Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Test Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Test",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Shipping Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Shipping",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Shipping Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Shipping",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d Linux Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d Linux Shipping Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"Linux",
+					"Shipping",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d LinuxArm64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d LinuxArm64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d LinuxArm64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Test Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Test",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Test Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Test",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d LinuxArm64 Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Test Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Test",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Shipping Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Shipping",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Shipping Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Shipping",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3d LinuxArm64 Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3d LinuxArm64 Shipping Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3d",
+					"LinuxArm64",
+					"Shipping",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3dEditor Linux Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"Debug",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3dEditor Linux DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"DebugGame",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"bh3dEditor Linux Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"label": "bh3dEditor Linux Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"bh3dEditor",
+					"Linux",
+					"Development",
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/fast/unreal/opt/unreal-engine"
+				}
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Launch bh3d (Debug)",
+				"request": "launch",
+				"program": "/home/MMUStuff/fyp/bh3d/Binaries/Linux/UnrealGame-Linux-Debug",
+				"preLaunchTask": "bh3d Linux Debug Build",
+				"args": [
+				],
+				"cwd": "/home/fast/unreal/opt/unreal-engine",
+				"type": "cppdbg",
+				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/bh3d": "/home/MMUStuff/fyp/bh3d",
+					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"name": "Launch bh3d (DebugGame)",
+				"request": "launch",
+				"program": "/home/MMUStuff/fyp/bh3d/Binaries/Linux/UnrealGame-Linux-DebugGame",
+				"preLaunchTask": "bh3d Linux DebugGame Build",
+				"args": [
+				],
+				"cwd": "/home/fast/unreal/opt/unreal-engine",
+				"type": "cppdbg",
+				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/bh3d": "/home/MMUStuff/fyp/bh3d",
+					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"name": "Launch bh3d (Development)",
+				"request": "launch",
+				"program": "/home/MMUStuff/fyp/bh3d/Binaries/Linux/UnrealGame",
+				"preLaunchTask": "bh3d Linux Development Build",
+				"args": [
+				],
+				"cwd": "/home/fast/unreal/opt/unreal-engine",
+				"type": "cppdbg",
+				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/bh3d": "/home/MMUStuff/fyp/bh3d",
+					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"name": "Launch bh3d (Test)",
+				"request": "launch",
+				"program": "/home/MMUStuff/fyp/bh3d/Binaries/Linux/UnrealGame-Linux-Test",
+				"preLaunchTask": "bh3d Linux Test Build",
+				"args": [
+				],
+				"cwd": "/home/fast/unreal/opt/unreal-engine",
+				"type": "cppdbg",
+				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/bh3d": "/home/MMUStuff/fyp/bh3d",
+					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"name": "Launch bh3d (Shipping)",
+				"request": "launch",
+				"program": "/home/MMUStuff/fyp/bh3d/Binaries/Linux/UnrealGame-Linux-Shipping",
+				"preLaunchTask": "bh3d Linux Shipping Build",
+				"args": [
+				],
+				"cwd": "/home/fast/unreal/opt/unreal-engine",
+				"type": "cppdbg",
+				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/bh3d": "/home/MMUStuff/fyp/bh3d",
+					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"name": "Launch bh3dEditor (Debug)",
+				"request": "launch",
+				"program": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/Linux/UnrealEditor-Linux-Debug",
+				"preLaunchTask": "bh3dEditor Linux Debug Build",
+				"args": [
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject"
+				],
+				"cwd": "/home/fast/unreal/opt/unreal-engine",
+				"type": "cppdbg",
+				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/bh3d": "/home/MMUStuff/fyp/bh3d",
+					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"name": "Launch bh3dEditor (DebugGame)",
+				"request": "launch",
+				"program": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/Linux/UnrealEditor-Linux-DebugGame",
+				"preLaunchTask": "bh3dEditor Linux DebugGame Build",
+				"args": [
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject"
+				],
+				"cwd": "/home/fast/unreal/opt/unreal-engine",
+				"type": "cppdbg",
+				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/bh3d": "/home/MMUStuff/fyp/bh3d",
+					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"name": "Launch bh3dEditor (Development)",
+				"request": "launch",
+				"program": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/Linux/UnrealEditor",
+				"preLaunchTask": "bh3dEditor Linux Development Build",
+				"args": [
+					"/home/MMUStuff/fyp/bh3d/bh3d.uproject"
+				],
+				"cwd": "/home/fast/unreal/opt/unreal-engine",
+				"type": "cppdbg",
+				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/bh3d": "/home/MMUStuff/fyp/bh3d",
+					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
+				}
+			},
+			{
+				"name": "Generate Project Files",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "UnrealBuildTool Linux Development Build",
+				"program": "/home/fast/unreal/opt/unreal-engine/Engine/Build/BatchFiles/RunUBT.bat",
+				"args": [
+					"-projectfiles",
+					"-vscode",
+					"-engine",
+					"-dotnet"
+				],
+				"env": {
+					"PATH": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64:${env:PATH}",
+					"DOTNET_ROOT": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64",
+					"DOTNET_HOST_PATH": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64/dotnet",
+					"DOTNET_MULTILEVEL_LOOKUP": "0",
+					"DOTNET_ROLL_FORWARD": "LatestMajor"
+				},
+				"console": "internalConsole",
+				"internalConsoleOptions": "openOnSessionStart",
+				"stopAtEntry": false,
+				"cwd": "/home/fast/unreal/opt/unreal-engine"
+			}
+		]
+	}
+}
