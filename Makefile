@@ -101,43 +101,43 @@ UnrealGame-LinuxArm64-Shipping:
 UnrealGame: UnrealGame-Linux-Development
 
 bh3d_fyp2-Android-DebugGame:
-	 $(BUILD) bh3d_fyp2 Android DebugGame  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 Android DebugGame  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2-Android-Development:
-	 $(BUILD) bh3d_fyp2 Android Development  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 Android Development  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2-Android-Shipping:
-	 $(BUILD) bh3d_fyp2 Android Shipping  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 Android Shipping  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2-Linux-DebugGame:
-	 $(BUILD) bh3d_fyp2 Linux DebugGame  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 Linux DebugGame  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2-Linux-Development:
-	 $(BUILD) bh3d_fyp2 Linux Development  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 Linux Development  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2-Linux-Shipping:
-	 $(BUILD) bh3d_fyp2 Linux Shipping  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 Linux Shipping  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2-LinuxArm64-DebugGame:
-	 $(BUILD) bh3d_fyp2 LinuxArm64 DebugGame  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 LinuxArm64 DebugGame  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2-LinuxArm64-Development:
-	 $(BUILD) bh3d_fyp2 LinuxArm64 Development  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 LinuxArm64 Development  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2-LinuxArm64-Shipping:
-	 $(BUILD) bh3d_fyp2 LinuxArm64 Shipping  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2 LinuxArm64 Shipping  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2: bh3d_fyp2-Linux-Development
 
 bh3d_fyp2Editor-Linux-DebugGame:
-	 $(BUILD) bh3d_fyp2Editor Linux DebugGame  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2Editor Linux DebugGame  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2Editor-Linux-Development:
-	 $(BUILD) bh3d_fyp2Editor Linux Development  -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" $(ARGS)
+	 $(BUILD) bh3d_fyp2Editor Linux Development  -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" $(ARGS)
 
 bh3d_fyp2Editor: bh3d_fyp2Editor-Linux-Development
 
 configure:
-	$(BUILD) -ProjectFiles -Project="/home/MMUStuff/fyp/bh3d_fyp2/bh3d_fyp2.uproject" -Game 
+	$(BUILD) -ProjectFiles -Project="/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject" -Game 
 
 .PHONY: $(TARGETS)

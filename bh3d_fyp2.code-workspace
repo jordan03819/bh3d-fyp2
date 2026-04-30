@@ -37,7 +37,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -54,7 +54,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -74,7 +74,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -92,7 +92,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -109,7 +109,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -129,7 +129,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -147,7 +147,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -164,7 +164,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -184,7 +184,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -202,7 +202,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Test",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -219,7 +219,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Test",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -239,7 +239,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Test",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -257,7 +257,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Shipping",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -274,7 +274,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Shipping",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -294,7 +294,7 @@
 					"bh3d_fyp2",
 					"Linux",
 					"Shipping",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -312,7 +312,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -329,7 +329,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -349,7 +349,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -367,7 +367,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -384,7 +384,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -404,7 +404,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -422,7 +422,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -439,7 +439,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -459,7 +459,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -477,7 +477,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Test",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -494,7 +494,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Test",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -514,7 +514,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Test",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -532,7 +532,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Shipping",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -549,7 +549,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Shipping",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -569,7 +569,7 @@
 					"bh3d_fyp2",
 					"LinuxArm64",
 					"Shipping",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -587,7 +587,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -604,7 +604,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -624,7 +624,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"Debug",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -642,7 +642,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -659,7 +659,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -679,7 +679,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"DebugGame",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -697,7 +697,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -714,7 +714,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -734,7 +734,7 @@
 					"bh3d_fyp2Editor",
 					"Linux",
 					"Development",
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject",
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
 					"-waitmutex",
 					"-clean"
 				],
@@ -752,7 +752,7 @@
 			{
 				"name": "Launch bh3d_fyp2 (Debug)",
 				"request": "launch",
-				"program": "/home/MMUStuff/fyp2/bh3d_fyp2/Binaries/Linux/UnrealGame-Linux-Debug",
+				"program": "/home/MMUStuff/fyp2/bh3d-fyp2/Binaries/Linux/UnrealGame-Linux-Debug",
 				"preLaunchTask": "bh3d_fyp2 Linux Debug Build",
 				"args": [
 				],
@@ -761,14 +761,14 @@
 				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
 				"showDisplayString": true,
 				"sourceFileMap": {
-					"/UEVFS/bh3d_fyp2": "/home/MMUStuff/fyp2/bh3d_fyp2",
+					"/UEVFS/bh3d-fyp2": "/home/MMUStuff/fyp2/bh3d-fyp2",
 					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
 				}
 			},
 			{
 				"name": "Launch bh3d_fyp2 (DebugGame)",
 				"request": "launch",
-				"program": "/home/MMUStuff/fyp2/bh3d_fyp2/Binaries/Linux/UnrealGame-Linux-DebugGame",
+				"program": "/home/MMUStuff/fyp2/bh3d-fyp2/Binaries/Linux/UnrealGame-Linux-DebugGame",
 				"preLaunchTask": "bh3d_fyp2 Linux DebugGame Build",
 				"args": [
 				],
@@ -777,14 +777,14 @@
 				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
 				"showDisplayString": true,
 				"sourceFileMap": {
-					"/UEVFS/bh3d_fyp2": "/home/MMUStuff/fyp2/bh3d_fyp2",
+					"/UEVFS/bh3d-fyp2": "/home/MMUStuff/fyp2/bh3d-fyp2",
 					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
 				}
 			},
 			{
 				"name": "Launch bh3d_fyp2 (Development)",
 				"request": "launch",
-				"program": "/home/MMUStuff/fyp2/bh3d_fyp2/Binaries/Linux/UnrealGame",
+				"program": "/home/MMUStuff/fyp2/bh3d-fyp2/Binaries/Linux/UnrealGame",
 				"preLaunchTask": "bh3d_fyp2 Linux Development Build",
 				"args": [
 				],
@@ -793,14 +793,14 @@
 				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
 				"showDisplayString": true,
 				"sourceFileMap": {
-					"/UEVFS/bh3d_fyp2": "/home/MMUStuff/fyp2/bh3d_fyp2",
+					"/UEVFS/bh3d-fyp2": "/home/MMUStuff/fyp2/bh3d-fyp2",
 					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
 				}
 			},
 			{
 				"name": "Launch bh3d_fyp2 (Test)",
 				"request": "launch",
-				"program": "/home/MMUStuff/fyp2/bh3d_fyp2/Binaries/Linux/UnrealGame-Linux-Test",
+				"program": "/home/MMUStuff/fyp2/bh3d-fyp2/Binaries/Linux/UnrealGame-Linux-Test",
 				"preLaunchTask": "bh3d_fyp2 Linux Test Build",
 				"args": [
 				],
@@ -809,14 +809,14 @@
 				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
 				"showDisplayString": true,
 				"sourceFileMap": {
-					"/UEVFS/bh3d_fyp2": "/home/MMUStuff/fyp2/bh3d_fyp2",
+					"/UEVFS/bh3d-fyp2": "/home/MMUStuff/fyp2/bh3d-fyp2",
 					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
 				}
 			},
 			{
 				"name": "Launch bh3d_fyp2 (Shipping)",
 				"request": "launch",
-				"program": "/home/MMUStuff/fyp2/bh3d_fyp2/Binaries/Linux/UnrealGame-Linux-Shipping",
+				"program": "/home/MMUStuff/fyp2/bh3d-fyp2/Binaries/Linux/UnrealGame-Linux-Shipping",
 				"preLaunchTask": "bh3d_fyp2 Linux Shipping Build",
 				"args": [
 				],
@@ -825,7 +825,7 @@
 				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
 				"showDisplayString": true,
 				"sourceFileMap": {
-					"/UEVFS/bh3d_fyp2": "/home/MMUStuff/fyp2/bh3d_fyp2",
+					"/UEVFS/bh3d-fyp2": "/home/MMUStuff/fyp2/bh3d-fyp2",
 					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
 				}
 			},
@@ -835,14 +835,14 @@
 				"program": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/Linux/UnrealEditor-Linux-Debug",
 				"preLaunchTask": "bh3d_fyp2Editor Linux Debug Build",
 				"args": [
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject"
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject"
 				],
 				"cwd": "/home/fast/unreal/opt/unreal-engine",
 				"type": "cppdbg",
 				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
 				"showDisplayString": true,
 				"sourceFileMap": {
-					"/UEVFS/bh3d_fyp2": "/home/MMUStuff/fyp2/bh3d_fyp2",
+					"/UEVFS/bh3d-fyp2": "/home/MMUStuff/fyp2/bh3d-fyp2",
 					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
 				}
 			},
@@ -852,14 +852,14 @@
 				"program": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/Linux/UnrealEditor-Linux-DebugGame",
 				"preLaunchTask": "bh3d_fyp2Editor Linux DebugGame Build",
 				"args": [
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject"
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject"
 				],
 				"cwd": "/home/fast/unreal/opt/unreal-engine",
 				"type": "cppdbg",
 				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
 				"showDisplayString": true,
 				"sourceFileMap": {
-					"/UEVFS/bh3d_fyp2": "/home/MMUStuff/fyp2/bh3d_fyp2",
+					"/UEVFS/bh3d-fyp2": "/home/MMUStuff/fyp2/bh3d-fyp2",
 					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
 				}
 			},
@@ -869,14 +869,14 @@
 				"program": "/home/fast/unreal/opt/unreal-engine/Engine/Binaries/Linux/UnrealEditor",
 				"preLaunchTask": "bh3d_fyp2Editor Linux Development Build",
 				"args": [
-					"/home/MMUStuff/fyp2/bh3d_fyp2/bh3d_fyp2.uproject"
+					"/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject"
 				],
 				"cwd": "/home/fast/unreal/opt/unreal-engine",
 				"type": "cppdbg",
 				"visualizerFile": "/home/fast/unreal/opt/unreal-engine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
 				"showDisplayString": true,
 				"sourceFileMap": {
-					"/UEVFS/bh3d_fyp2": "/home/MMUStuff/fyp2/bh3d_fyp2",
+					"/UEVFS/bh3d-fyp2": "/home/MMUStuff/fyp2/bh3d-fyp2",
 					"/UEVFS/Root": "/home/fast/unreal/opt/unreal-engine"
 				}
 			},
@@ -889,6 +889,8 @@
 				"args": [
 					"-projectfiles",
 					"-vscode",
+					"-project=/home/MMUStuff/fyp2/bh3d-fyp2/bh3d_fyp2.uproject",
+					"-game",
 					"-engine",
 					"-dotnet"
 				],
