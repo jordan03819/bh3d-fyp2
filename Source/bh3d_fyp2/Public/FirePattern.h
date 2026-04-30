@@ -61,7 +61,7 @@
  *     CustomDirections = UBulletSpreadLibrary::GetTruncatedIcosahedronDirections()
  */
 UCLASS(BlueprintType)
-class BH3D_API UFirePattern : public UDataAsset
+class BH3D_FYP2_API UFirePattern : public UDataAsset
 {
     GENERATED_BODY()
 

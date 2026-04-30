@@ -29,7 +29,7 @@
  * that you place directly in UFirePattern.CustomDirections.
  */
 UCLASS()
-class BH3D_API UBulletSpreadLibrary : public UBlueprintFunctionLibrary
+class BH3D_FYP2_API UBulletSpreadLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 

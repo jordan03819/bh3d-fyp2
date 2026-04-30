@@ -81,7 +81,7 @@ struct FAttackPhase
  *     (sequence ends, spawner goes idle)
  */
 UCLASS(BlueprintType)
-class BH3D_API UAttackSequence : public UDataAsset
+class BH3D_FYP2_API UAttackSequence : public UDataAsset
 {
     GENERATED_BODY()
 

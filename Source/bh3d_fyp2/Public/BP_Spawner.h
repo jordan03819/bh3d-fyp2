@@ -7,7 +7,7 @@
 #include "BP_Spawner.generated.h"
 
 UCLASS()
-class BH3D_API ABP_Spawner : public AActor
+class BH3D_FYP2_API ABP_Spawner : public AActor
 {
 	GENERATED_BODY()
 	

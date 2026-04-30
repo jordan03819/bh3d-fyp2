@@ -29,7 +29,7 @@
  *   SpawnActor(). After that it never touches this bullet again.
  */
 UCLASS(Blueprintable)
-class BH3D_API ACPP_Bullet : public AActor
+class BH3D_FYP2_API ACPP_Bullet : public AActor
 {
     GENERATED_BODY()
 

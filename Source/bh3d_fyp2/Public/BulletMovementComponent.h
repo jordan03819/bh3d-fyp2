@@ -31,7 +31,7 @@
  */
 UCLASS(ClassGroup=(BulletSystem), Blueprintable,
        meta=(BlueprintSpawnableComponent))
-class BH3D_API UBulletMovementComponent : public UActorComponent
+class BH3D_FYP2_API UBulletMovementComponent : public UActorComponent
 {
     GENERATED_BODY()
 

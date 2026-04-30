@@ -32,7 +32,7 @@
  *   without modifying C++.
  */
 UCLASS(Blueprintable)
-class BH3D_API ACPP_Spawner : public AActor
+class BH3D_FYP2_API ACPP_Spawner : public AActor
 {
     GENERATED_BODY()
 

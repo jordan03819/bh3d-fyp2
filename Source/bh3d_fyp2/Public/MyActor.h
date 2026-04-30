@@ -7,7 +7,7 @@
 #include "MyActor.generated.h"
 
 UCLASS()
-class BH3D_API AMyActor : public AActor
+class BH3D_FYP2_API AMyActor : public AActor
 {
 	GENERATED_BODY()
 	
