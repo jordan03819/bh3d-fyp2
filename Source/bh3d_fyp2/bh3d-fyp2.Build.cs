@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class bh3d : ModuleRules
+public class bh3d_fyp2 : ModuleRules
 {
-	public bh3d(ReadOnlyTargetRules Target) : base(Target)
+	public bh3d_fyp2(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	

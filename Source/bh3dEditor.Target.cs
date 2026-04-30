@@ -3,13 +3,13 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class bh3dEditorTarget : TargetRules
+public class bh3d_fyp2EditorTarget : TargetRules
 {
-	public bh3dEditorTarget(TargetInfo Target) : base(Target)
+	public bh3d_fyp2EditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 
-		ExtraModuleNames.AddRange( new string[] { "bh3d" } );
+		ExtraModuleNames.AddRange( new string[] { "bh3d_fyp2" } );
 	}
 }
