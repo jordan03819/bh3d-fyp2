@@ -6,6 +6,9 @@
 ACPP_Spawner::ACPP_Spawner()
 {
     PrimaryActorTick.bCanEverTick = true;
+
+    SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+    SetRootComponent(SceneRoot);
 }
 
 void ACPP_Spawner::BeginPlay()
@@ -128,56 +131,30 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
 {
     if (!Pattern || !GetWorld()) return;
 
-    const FVector Origin   = GetActorLocation();
+    const FVector Origin = GetActorLocation();
+
+    // SpinAxis is ONLY used for the spin/offset rotation of the whole pattern.
     const FVector SpinAxis = Pattern->SpinAxis.GetSafeNormal();
-
-    // Total azimuth/spin rotation applied to the whole pattern this volley.
-    // Applies to both parametric and custom layout modes.
-    const float TotalAzimuth = Pattern->OffsetAngle + AccumSpinAngle;
-    const FQuat PatternRot(SpinAxis, FMath::DegreesToRadians(TotalAzimuth));
-
-    // ── Collect beam directions ───────────────────────────────────────────
-    //
-    // Two modes:
-    //   Custom:     use Pattern->CustomDirections directly (arbitrary geometry)
-    //   Parametric: compute directions from azimuth + elevation parameters
-    //
-    // Both modes produce a flat TArray<FVector> of world-space unit vectors.
-    // Everything below this block is identical for both modes.
-
-    TArray<FVector> BeamDirs;
+    const float   TotalAzimuth = Pattern->OffsetAngle + AccumSpinAngle;
+    const FQuat   PatternRot(SpinAxis, FMath::DegreesToRadians(TotalAzimuth));
 
     const bool bCustomLayout = Pattern->CustomDirections.Num() > 0;
 
+    TArray<FVector> BeamDirs;
+
     if (bCustomLayout)
     {
-        // ── Custom layout ─────────────────────────────────────────────────
-        //
-        // Rotate each custom direction by the accumulated spin.
-        // OffsetAngle and SpinRate still apply — the whole set of directions
-        // rotates as a rigid body around SpinAxis.
-
         BeamDirs.Reserve(Pattern->CustomDirections.Num());
-
         for (const FVector& Dir : Pattern->CustomDirections)
-        {
             BeamDirs.Add(PatternRot.RotateVector(Dir).GetSafeNormal());
-        }
     }
     else
     {
-        // ── Parametric layout ─────────────────────────────────────────────
-        //
-        // Beams are arranged in a grid of elevation rings × azimuth steps.
-        //
-        // AZIMUTH: rotate the spawner's forward vector around SpinAxis by
-        //   (azimuthIndex × AngleBetweenBeams), then apply PatternRot on top.
-        //
-        // ELEVATION: tilt each beam away from the equatorial plane by rotating
-        //   around ElevAxis — the axis perpendicular to both SpinAxis and the
-        //   current azimuth direction. This preserves azimuth angle exactly.
-
         const FVector ForwardDir = GetActorForwardVector();
+
+        // Beams distribute around the spawner's local up vector — completely
+        // independent of SpinAxis. Rotating the spawner actor rotates the pattern.
+        const FVector AzimuthAxis = GetActorUpVector();
 
         const int32 ElevSteps  = FMath::Max(1, Pattern->ElevationSteps);
         const float ElevCentre = Pattern->DefaultElevationAngle;
@@ -188,27 +165,25 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
 
         for (int32 ElevIdx = 0; ElevIdx < ElevSteps; ElevIdx++)
         {
-            // Elevation of this ring, centred around ElevCentre.
             const float RingElevation = (ElevSteps > 1)
                 ? ElevCentre - ElevSpan * 0.5f + ElevIdx * ElevGap
                 : ElevCentre;
 
             for (int32 AzimIdx = 0; AzimIdx < Pattern->BeamCount; AzimIdx++)
             {
-                // Step 1: Azimuth — place the beam around the ring.
+                // Azimuth: rotate around spawner's local up, then apply pattern spin.
                 const float AzimDeg = AzimIdx * Pattern->AngleBetweenBeams;
-                const FQuat BeamAzimRot(SpinAxis, FMath::DegreesToRadians(AzimDeg));
+                const FQuat BeamAzimRot(AzimuthAxis, FMath::DegreesToRadians(AzimDeg));
                 FVector BeamDir = PatternRot.RotateVector(
                                       BeamAzimRot.RotateVector(ForwardDir)).GetSafeNormal();
 
-                // Step 2: Elevation — tilt the beam up or down.
-                // ElevAxis is perpendicular to both SpinAxis and BeamDir, so
-                // tilting around it does not disturb the azimuth angle.
-                const FVector ElevAxis = FVector::CrossProduct(SpinAxis, BeamDir).GetSafeNormal();
+                // Elevation: tilt around the beam's own right vector.
+                // Use AzimuthAxis (spawner up) here too, not SpinAxis.
+                const FVector ElevAxis = FVector::CrossProduct(
+                                             AzimuthAxis, BeamDir).GetSafeNormal();
 
                 if (!ElevAxis.IsNearlyZero())
                 {
-                    // Fetch per-beam elevation offset (if any).
                     const int32 BeamIdx = ElevIdx * Pattern->BeamCount + AzimIdx;
                     const FBeamDefinition* BeamDef =
                         Pattern->BeamOverrides.IsValidIndex(BeamIdx)
@@ -217,7 +192,6 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
 
                     const float TotalElev = RingElevation +
                                             (BeamDef ? BeamDef->ElevationOffset : 0.f);
-
                     const FQuat ElevRot(ElevAxis, FMath::DegreesToRadians(TotalElev));
                     BeamDir = ElevRot.RotateVector(BeamDir).GetSafeNormal();
                 }

@@ -45,6 +45,9 @@ public:
      * The attack sequence this spawner will execute.
      * Can be swapped at runtime via SetSequence().
      */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="BulletSystem|Components",meta=(AllowPrivateAccess="true"))
+    USceneComponent* SceneRoot;
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="BulletSystem|Spawner")
     UAttackSequence* Sequence;
 
