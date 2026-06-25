@@ -1,4 +1,6 @@
 #include "BulletMovementComponent.h"
+#include "CPP_Bullet.h"           // for Cast<ACPP_Bullet> in lifetime expiry
+#include "CPP_BulletManager.h"    // for ReturnBullet — replaces Destroy()
 
 UBulletMovementComponent::UBulletMovementComponent()
 {
@@ -6,6 +8,7 @@ UBulletMovementComponent::UBulletMovementComponent()
 
     // Disable tick until the component is initialized by the spawner.
     // This prevents UpdateMotion running on an uninitialized bullet.
+    // POOL: dormant bullets sitting in the free list also cost zero tick overhead.
     PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
@@ -22,15 +25,31 @@ void UBulletMovementComponent::Initialize(const FBulletMotionParams& Params)
     bInitialized  = true;
 
     // Build the initial velocity from the owner's forward vector.
-    // The spawner sets the rotation before calling Initialize, so
-    // GetActorForwardVector() already points in the intended fire direction.
+    // The spawner (or BulletManager::FireBullet) sets the rotation before
+    // calling Initialize, so GetActorForwardVector() already points in the
+    // intended fire direction.
     if (AActor* Owner = GetOwner())
     {
-        Velocity = Owner->GetActorForwardVector() * MotionParams.InitialSpeed;
+        // CHANGED: also cache CurrentSpeed so UpdateMotion never calls Velocity.Size().
+        CurrentSpeed = MotionParams.InitialSpeed;
+        Velocity     = Owner->GetActorForwardVector() * CurrentSpeed;
     }
 
     // Now safe to tick.
     SetComponentTickEnabled(true);
+}
+
+// POOL: called by BulletManager::DeactivateEntry instead of Owner->Destroy().
+void UBulletMovementComponent::ResetForPool()
+{
+    // Stop ticking immediately — no further UpdateMotion calls while dormant.
+    SetComponentTickEnabled(false);
+
+    // Clear state so the next Initialize() starts completely clean.
+    Velocity     = FVector::ZeroVector;
+    CurrentSpeed = 0.f;
+    ElapsedTime  = 0.f;
+    bInitialized = false;
 }
 
 void UBulletMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -52,21 +71,35 @@ void UBulletMovementComponent::UpdateMotion_Implementation(float DeltaTime)
     // ── Lifetime check ────────────────────────────────────────────────────
     if (MotionParams.Lifetime > 0.f && ElapsedTime >= MotionParams.Lifetime)
     {
-        Owner->Destroy();
+        // CHANGED: Disable tick first so no further frames run during the
+        // return-to-pool handoff.
+        SetComponentTickEnabled(false);
+
+        // CHANGED: Return to pool instead of Destroy().
+        // Destroy() is never called at runtime — BulletManager reuses the actor.
+        // Falls back to Destroy() if no manager exists (e.g. PIE without manager).
+        ACPP_BulletManager* Manager = ACPP_BulletManager::Get(this);
+        if (Manager)
+        {
+            Manager->ReturnBullet(Cast<ACPP_Bullet>(Owner));
+        }
+        else
+        {
+            Owner->Destroy();
+        }
         return;
     }
 
     // ── Speed ─────────────────────────────────────────────────────────────
-    // Extract current speed, apply acceleration, clamp if needed.
-    float Speed = Velocity.Length();
-
+    // CHANGED: Use cached CurrentSpeed — avoids Velocity.Size() (sqrt) every tick.
+    // Previously: float Speed = Velocity.Length();
     if (MotionParams.LinearAcceleration != 0.f)
     {
-        Speed += MotionParams.LinearAcceleration * DeltaTime;
-        Speed  = FMath::Max(Speed, 0.f);
+        CurrentSpeed += MotionParams.LinearAcceleration * DeltaTime;
+        CurrentSpeed  = FMath::Max(CurrentSpeed, 0.f);
 
         if (MotionParams.MaxSpeed > 0.f)
-            Speed = FMath::Min(Speed, MotionParams.MaxSpeed);
+            CurrentSpeed = FMath::Min(CurrentSpeed, MotionParams.MaxSpeed);
     }
 
     // ── Direction (angular velocity) ──────────────────────────────────────
@@ -75,21 +108,53 @@ void UBulletMovementComponent::UpdateMotion_Implementation(float DeltaTime)
     if (!MotionParams.AngularVelocity.IsZero())
     {
         FRotator FrameRot = MotionParams.AngularVelocity * DeltaTime;
-        FVector  Dir      = FrameRot.RotateVector(Velocity.GetSafeNormal());
-        Velocity = Dir * Speed;
+        // CHANGED: Velocity.GetSafeNormal() dropped from the else branch (was a
+        // wasted sqrt when no rotation). Here it's still needed to get the unit
+        // direction before rotating, but only runs on the angular-velocity path.
+        FVector Dir = FrameRot.RotateVector(Velocity.GetSafeNormal());
+        Velocity    = Dir * CurrentSpeed;
     }
     else
     {
-        // No rotation — just reapply possibly-changed speed to the same direction.
-        Velocity = Velocity.GetSafeNormal() * Speed;
+        // No rotation — direction is fixed. Reapply speed to the existing direction
+        // using the cached CurrentSpeed, no normalise needed.
+        // Previously: Velocity = Velocity.GetSafeNormal() * Speed;  ← sqrt every frame
+        Velocity = Velocity.GetUnsafeNormal() * CurrentSpeed;
+        // GetUnsafeNormal is safe here: Velocity was set from a valid direction in
+        // Initialize() and only ever scaled, never zeroed in this code path.
     }
 
-    // ── Position ──────────────────────────────────────────────────────────
-    FVector NewLocation = Owner->GetActorLocation() + Velocity * DeltaTime;
-    Owner->SetActorLocation(NewLocation);
+    // ── Position + Rotation ───────────────────────────────────────────────
+    const FVector NewLocation = Owner->GetActorLocation() + Velocity * DeltaTime;
 
-    // Keep actor rotation aligned with travel direction (matters for
-    // child components like meshes and hit shapes that rely on forward vector).
+    // CHANGED: was two separate calls:
+    //   Owner->SetActorLocation(NewLocation);             ← ETeleportType::None → UpdateOverlaps
+    //   Owner->SetActorRotation(Velocity.Rotation());     ← ETeleportType::None → UpdateOverlaps again
+    //
+    // SetActorLocationAndRotation with TeleportPhysics does ONE transform update
+    // and skips UpdateOverlaps entirely. This is the fix for the three profiler
+    // entries: "UpdateOverlaps", "MoveComponent(scene comp)", and the overlap
+    // portion of "World tick time".
+    //
+    // Collision detection is now handled by BulletManager::QueryBulletsAt(),
+    // called once per frame from the player/enemy — not by per-bullet overlap events.
     if (!Velocity.IsNearlyZero())
-        Owner->SetActorRotation(Velocity.Rotation());
+    {
+        Owner->SetActorLocationAndRotation(
+            NewLocation,
+            Velocity.Rotation(),
+            /*bSweep=*/false,
+            /*OutSweepHitResult=*/nullptr,
+            ETeleportType::TeleportPhysics    // ← skips UpdateOverlaps
+        );
+    }
+    else
+    {
+        Owner->SetActorLocation(
+            NewLocation,
+            /*bSweep=*/false,
+            /*OutSweepHitResult=*/nullptr,
+            ETeleportType::TeleportPhysics
+        );
+    }
 }

@@ -48,6 +48,11 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="BulletSystem|Components",meta=(AllowPrivateAccess="true"))
     USceneComponent* SceneRoot;
     
+    /** Draw beam directions as debug lines instead of spawning bullets.
+ *  Use this to verify pattern geometry before live testing. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="BulletSystem|Debug")
+    bool bDebugDrawOnly = false;
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="BulletSystem|Spawner")
     UAttackSequence* Sequence;
 

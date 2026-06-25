@@ -1,7 +1,9 @@
 #include "CPP_Spawner.h"
 #include "CPP_Bullet.h"
+#include "CPP_BulletManager.h"
 #include "BulletSpreadLibrary.h"
 #include "Engine/World.h"
+#include "DrawDebugHelpers.h"
 
 ACPP_Spawner::ACPP_Spawner()
 {
@@ -131,12 +133,14 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
 {
     if (!Pattern || !GetWorld()) return;
 
-    const FVector Origin = GetActorLocation();
+    const FVector Origin      = GetActorLocation();
+    const FVector ForwardDir  = GetActorForwardVector();
+    const FVector AzimuthAxis = GetActorUpVector();  // beam distribution axis
 
-    // SpinAxis is ONLY used for the spin/offset rotation of the whole pattern.
-    const FVector SpinAxis = Pattern->SpinAxis.GetSafeNormal();
-    const float   TotalAzimuth = Pattern->OffsetAngle + AccumSpinAngle;
-    const FQuat   PatternRot(SpinAxis, FMath::DegreesToRadians(TotalAzimuth));
+    // SpinAxis in world space — only used for the final rigid-body rotation.
+    const FVector SpinAxis   = Pattern->SpinAxis.GetSafeNormal();
+    const float   TotalSpin  = Pattern->OffsetAngle + AccumSpinAngle;
+    const FQuat   PatternRot(SpinAxis, FMath::DegreesToRadians(TotalSpin));
 
     const bool bCustomLayout = Pattern->CustomDirections.Num() > 0;
 
@@ -146,16 +150,14 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
     {
         BeamDirs.Reserve(Pattern->CustomDirections.Num());
         for (const FVector& Dir : Pattern->CustomDirections)
+        {
+            // Custom directions are defined in spawner-local space at rest.
+            // Apply spin as the final step.
             BeamDirs.Add(PatternRot.RotateVector(Dir).GetSafeNormal());
+        }
     }
     else
     {
-        const FVector ForwardDir = GetActorForwardVector();
-
-        // Beams distribute around the spawner's local up vector — completely
-        // independent of SpinAxis. Rotating the spawner actor rotates the pattern.
-        const FVector AzimuthAxis = GetActorUpVector();
-
         const int32 ElevSteps  = FMath::Max(1, Pattern->ElevationSteps);
         const float ElevCentre = Pattern->DefaultElevationAngle;
         const float ElevGap    = Pattern->AngleBetweenElevations;
@@ -171,16 +173,18 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
 
             for (int32 AzimIdx = 0; AzimIdx < Pattern->BeamCount; AzimIdx++)
             {
-                // Azimuth: rotate around spawner's local up, then apply pattern spin.
+                // ── Step 1: azimuth in spawner-local space ────────────────
+                // Rotate forward around the spawner's up axis.
+                // No spin applied yet — this is the rest pose.
                 const float AzimDeg = AzimIdx * Pattern->AngleBetweenBeams;
-                const FQuat BeamAzimRot(AzimuthAxis, FMath::DegreesToRadians(AzimDeg));
-                FVector BeamDir = PatternRot.RotateVector(
-                                      BeamAzimRot.RotateVector(ForwardDir)).GetSafeNormal();
+                const FQuat AzimRot(AzimuthAxis, FMath::DegreesToRadians(AzimDeg));
+                FVector RestDir = AzimRot.RotateVector(ForwardDir).GetSafeNormal();
 
-                // Elevation: tilt around the beam's own right vector.
-                // Use AzimuthAxis (spawner up) here too, not SpinAxis.
+                // ── Step 2: elevation in spawner-local space ──────────────
+                // ElevAxis is computed from the REST pose direction, not the
+                // spun direction. This keeps it stable across all spin angles.
                 const FVector ElevAxis = FVector::CrossProduct(
-                                             AzimuthAxis, BeamDir).GetSafeNormal();
+                    AzimuthAxis, RestDir).GetSafeNormal();
 
                 if (!ElevAxis.IsNearlyZero())
                 {
@@ -193,21 +197,22 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
                     const float TotalElev = RingElevation +
                                             (BeamDef ? BeamDef->ElevationOffset : 0.f);
                     const FQuat ElevRot(ElevAxis, FMath::DegreesToRadians(TotalElev));
-                    BeamDir = ElevRot.RotateVector(BeamDir).GetSafeNormal();
+                    RestDir = ElevRot.RotateVector(RestDir).GetSafeNormal();
                 }
 
-                BeamDirs.Add(BeamDir);
+                // ── Step 3: apply spin as a single rigid-body rotation ────
+                // PatternRot rotates around SpinAxis in world space.
+                // Applied last so it doesn't disturb the rest-pose geometry.
+                BeamDirs.Add(PatternRot.RotateVector(RestDir).GetSafeNormal());
             }
         }
     }
 
     // ── Fire each beam ────────────────────────────────────────────────────
     //
-    // For each beam direction we:
-    //   1. Build a cone local frame (ConeRight, ConeUp) perpendicular to BeamDir.
-    //   2. Resolve spread directions (preset or custom) in beam-local space.
-    //   3. Transform each local spread dir to world space.
-    //   4. Spawn a bullet, set its rotation, and hand off motion params.
+    // Fetch the manager once per volley.  All bullet acquisitions go through
+    // it — SpawnActor is never called at runtime after pool warm-up.
+    ACPP_BulletManager* Manager = ACPP_BulletManager::Get(this);
 
     for (int32 BeamIdx = 0; BeamIdx < BeamDirs.Num(); BeamIdx++)
     {
@@ -296,15 +301,45 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
             // Stagger spawn positions along the beam direction (optional).
             const FVector SpawnPos = Origin + BeamDir * (BulletIdx * Spacing);
 
-            AActor* Spawned = GetWorld()->SpawnActor<AActor>(
-                BulletClass, SpawnPos, BulletDir.Rotation());
-
-            // Pass motion params to the bullet. Its forward vector is already
-            // set correctly by the rotation passed to SpawnActor, so the movement
-            // component will build the initial velocity from GetActorForwardVector().
-            if (ACPP_Bullet* Bullet = Cast<ACPP_Bullet>(Spawned))
+            if (bDebugDrawOnly)
             {
-                Bullet->InitializeBullet(MotionParams);
+                // Draw a line showing bullet direction, length represents speed
+                DrawDebugLine(
+                    GetWorld(),
+                    SpawnPos,
+                    SpawnPos + BulletDir * 600.f,
+                    FColor::Red,
+                    false,    // not persistent — redraws each volley
+                    0.15f,    // lifetime in seconds — just long enough to see
+                    0,
+                    10.f      // thickness
+                );
+
+                // Draw a point at the spawn position
+                DrawDebugPoint(
+                    GetWorld(),
+                    SpawnPos,
+                    8.f,
+                    FColor::Yellow,
+                    false,
+                    0.1f
+                );
+            }
+            else if (Manager)
+            {
+                // Pull from pool — no SpawnActor call at runtime.
+                // FireBullet positions the bullet, sets its rotation, and calls
+                // InitializeBullet(MotionParams), so we don't need to do it here.
+                //
+                // BulletClass is TSubclassOf<AActor>; FireBullet takes
+                // TSubclassOf<ACPP_Bullet>.  The explicit construction is safe
+                // because ResolveBulletClass only ever returns ACPP_Bullet subclasses.
+                Manager->FireBullet(
+                    TSubclassOf<ACPP_Bullet>(BulletClass.Get()),
+                    SpawnPos,
+                    BulletDir,
+                    MotionParams
+                );
             }
         }
     }

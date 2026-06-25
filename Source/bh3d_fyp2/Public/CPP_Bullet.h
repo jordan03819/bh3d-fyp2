@@ -48,6 +48,23 @@ public:
     UFUNCTION(BlueprintCallable, Category="BulletSystem|Bullet")
     void InitializeBullet(const FBulletMotionParams& Params);
 
+    /**
+     * Called by BulletManager immediately before this bullet becomes active.
+     * Implement in BP_BulletNew to re-activate the Niagara trail / muzzle flash.
+     * Without this, Niagara stays deactivated from the previous pool return.
+     */
+    UFUNCTION(BlueprintImplementableEvent, Category="BulletSystem|Pool")
+    void OnActivatedFromPool();
+
+    /**
+     * Called by BulletManager immediately when this bullet is returned to the pool.
+     * Implement in BP_BulletNew to call Deactivate on the Niagara component.
+     * Without this, Niagara keeps simulating on every dormant bullet in the pool,
+     * which shows up as steadily increasing tick time.
+     */
+    UFUNCTION(BlueprintImplementableEvent, Category="BulletSystem|Pool")
+    void OnReturnedToPool();
+
 protected:
     virtual void BeginPlay() override;
 

@@ -5,6 +5,8 @@
 #include "BulletMotionParams.h"
 #include "BulletMovementComponent.generated.h"
 
+class ACPP_BulletManager;
+
 /**
  * UBulletMovementComponent
  *
@@ -25,9 +27,12 @@
  *
  * ── Lifecycle ────────────────────────────────────────────────────────────
  *
- *   SpawnActor() creates the bullet.
- *   Spawner calls bullet->InitializeBullet(Params), which calls Initialize() here.
- *   TickComponent() calls UpdateMotion() every frame until the bullet is destroyed.
+ *   BulletManager::GrowPool() pre-spawns the bullet (tick disabled).
+ *   BulletManager::FireBullet() calls bullet->InitializeBullet(Params)
+ *       → Initialize() here re-enables tick and sets initial velocity.
+ *   TickComponent() calls UpdateMotion() every frame while the bullet is live.
+ *   On lifetime expiry, UpdateMotion calls BulletManager::ReturnBullet()
+ *       → ResetForPool() here disables tick and clears state ready for reuse.
  */
 UCLASS(ClassGroup=(BulletSystem), Blueprintable,
        meta=(BlueprintSpawnableComponent))
@@ -47,6 +52,14 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category="BulletSystem|Movement")
     void Initialize(const FBulletMotionParams& Params);
+
+    /**
+     * Called by ACPP_BulletManager when this bullet is returned to the pool.
+     * Disables tick and clears motion state so the next Initialize() starts clean.
+     * Do NOT call Destroy() — the manager reuses this actor.
+     */
+    UFUNCTION(BlueprintCallable, Category="BulletSystem|Movement")
+    void ResetForPool();
 
 protected:
     virtual void BeginPlay() override;
@@ -79,6 +92,14 @@ protected:
      */
     UPROPERTY(BlueprintReadOnly, Category="BulletSystem|Movement")
     FVector Velocity = FVector::ZeroVector;
+
+    /**
+     * Cached scalar speed (cm/s) — kept in sync with Velocity to avoid
+     * a Velocity.Size() sqrt call every tick.
+     * Subclasses: if you modify Velocity directly, also update CurrentSpeed.
+     */
+    UPROPERTY(BlueprintReadOnly, Category="BulletSystem|Movement")
+    float CurrentSpeed = 0.f;
 
     /** Seconds elapsed since Initialize() was called. */
     UPROPERTY(BlueprintReadOnly, Category="BulletSystem|Movement")
