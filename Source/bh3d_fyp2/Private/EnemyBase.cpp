@@ -1,30 +1,57 @@
-// EnemyBase.cpp
-
 #include "EnemyBase.h"
 #include "CPP_Spawner.h"
+#include "MovementSequence.h"
+
+#include "Components/ChildActorComponent.h"
 
 AEnemyBase::AEnemyBase()
 {
     PrimaryActorTick.bCanEverTick = true;
+
+    RootComponent =
+        CreateDefaultSubobject<USceneComponent>(
+            TEXT("Root"));
+
+    SpawnerComponent =
+        CreateDefaultSubobject<UChildActorComponent>(
+            TEXT("Spawner"));
+
+    SpawnerComponent->SetupAttachment(RootComponent);
 }
 
 void AEnemyBase::BeginPlay()
 {
     Super::BeginPlay();
 
-    ChooseNewDestination();
+    SpawnLocation = GetActorLocation();
+
+    Spawner =
+        Cast<ACPP_Spawner>(
+            SpawnerComponent->GetChildActor());
+
+    CurrentPoint = 0;
 
     State = EEnemyState::Moving;
 
     if (Spawner)
     {
-        Spawner->SetAttackPaused(true);
+        Spawner->SetPaused(true);
     }
 }
 
 void AEnemyBase::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (!MovementSequence)
+    {
+        return;
+    }
+
+    if (!MovementSequence->Points.IsValidIndex(CurrentPoint))
+    {
+        return;
+    }
 
     switch (State)
     {
@@ -40,63 +67,69 @@ void AEnemyBase::Tick(float DeltaTime)
 
 void AEnemyBase::UpdateMovement(float DeltaTime)
 {
-    if (Spawner)
-    {
-        Spawner->SetAttackPaused(true);
-    }
+    const FMovementPoint& Point =
+        MovementSequence->Points[CurrentPoint];
 
-    FVector Direction =
-        (TargetLocation - GetActorLocation()).GetSafeNormal();
+    FVector Target =
+        SpawnLocation + Point.Offset;
 
-    AddActorWorldOffset(
-        Direction * MoveSpeed * DeltaTime,
-        true);
+    FVector ToTarget =
+        Target - GetActorLocation();
 
     float Distance =
-        FVector::Dist(GetActorLocation(), TargetLocation);
+        ToTarget.Size();
 
     if (Distance <= AcceptanceRadius)
     {
+        SetActorLocation(Target);
+
         AttackTimer = 0.f;
+
         State = EEnemyState::Attacking;
 
         if (Spawner)
         {
-            Spawner->SetAttackPaused(false);
+            Spawner->SetPaused(false);
         }
+
+        return;
     }
+
+    FVector Direction =
+        ToTarget.GetSafeNormal();
+
+    float MoveDistance =
+        FMath::Min(
+            MoveSpeed * DeltaTime,
+            Distance);
+
+    AddActorWorldOffset(
+        Direction * MoveDistance,
+        true);
 }
 
 void AEnemyBase::UpdateAttack(float DeltaTime)
 {
-    if (Spawner)
-    {
-        Spawner->SetAttackPaused(false);
-    }
+    const FMovementPoint& Point =
+        MovementSequence->Points[CurrentPoint];
 
     AttackTimer += DeltaTime;
 
-    if (AttackTimer >= AttackDuration)
+    if (AttackTimer >= Point.AttackDuration)
     {
-        ChooseNewDestination();
+        CurrentPoint++;
+
+        if (!MovementSequence->Points.IsValidIndex(CurrentPoint))
+        {
+            Destroy();
+            return;
+        }
 
         State = EEnemyState::Moving;
 
         if (Spawner)
         {
-            Spawner->SetAttackPaused(true);
+            Spawner->SetPaused(true);
         }
     }
-}
-
-void AEnemyBase::ChooseNewDestination()
-{
-    FVector Direction = FMath::VRand();
-
-    Direction.Z = 0.f;
-    Direction.Normalize();
-
-    TargetLocation =
-        GetActorLocation() +
-        Direction * RepositionDistance;
 }
