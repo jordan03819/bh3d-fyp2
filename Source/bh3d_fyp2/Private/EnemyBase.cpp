@@ -1,5 +1,7 @@
+// EnemyBase.cpp
+
 #include "EnemyBase.h"
-#include "Kismet/GameplayStatics.h"
+#include "CPP_Spawner.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -9,71 +11,92 @@ AEnemyBase::AEnemyBase()
 void AEnemyBase::BeginPlay()
 {
     Super::BeginPlay();
-    CurrentHealth = MaxHealth;
-    CachedPlayer = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+
+    ChooseNewDestination();
+
+    State = EEnemyState::Moving;
+
+    if (Spawner)
+    {
+        Spawner->SetAttackPaused(true);
+    }
 }
 
 void AEnemyBase::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    MoveTowardsPlayer(DeltaTime);
-}
 
-void AEnemyBase::TakeDamage_Enemy_Implementation(float Damage)
-{
-    CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
-    OnHealthChanged(CurrentHealth, -Damage); // Blueprint reacts visually
-
-    if (CurrentHealth <= 0.f)
+    switch (State)
     {
-        OnDeath(); // Blueprint handles the spectacle
-        // Don't Destroy() here — let Blueprint decide timing
-        // (e.g. wait for dissolve anim to finish)
+        case EEnemyState::Moving:
+            UpdateMovement(DeltaTime);
+            break;
+
+        case EEnemyState::Attacking:
+            UpdateAttack(DeltaTime);
+            break;
     }
 }
 
-void AEnemyBase::MoveTowardsPlayer(float DeltaTime)
+void AEnemyBase::UpdateMovement(float DeltaTime)
 {
-    if (!CachedPlayer)
+    if (Spawner)
     {
-        UE_LOG(LogTemp, Warning, TEXT("EnemyBase: No player found!"));
-        return;
+        Spawner->SetAttackPaused(true);
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("EnemyBase: Moving towards player at %s"),
-        *CachedPlayer->GetActorLocation().ToString());
+    FVector Direction =
+        (TargetLocation - GetActorLocation()).GetSafeNormal();
 
-    FVector EnemyLoc  = GetActorLocation();
-    FVector PlayerLoc = CachedPlayer->GetActorLocation();
-    FVector Dir       = (PlayerLoc - EnemyLoc).GetSafeNormal();
+    AddActorWorldOffset(
+        Direction * MoveSpeed * DeltaTime,
+        true);
 
-    // Sphere cast ahead for obstacle avoidance
-    FHitResult Hit;
-    FCollisionQueryParams Params;
-    Params.AddIgnoredActor(this);
+    float Distance =
+        FVector::Dist(GetActorLocation(), TargetLocation);
 
-    bool bBlocked = GetWorld()->SweepSingleByChannel(
-        Hit, EnemyLoc,
-        EnemyLoc + Dir * ProbeDistance,
-        FQuat::Identity,
-        ECC_WorldStatic,
-        FCollisionShape::MakeSphere(ProbeRadius),
-        Params
-    );
-
-    FVector MoveDir = bBlocked
-        ? FVector::VectorPlaneProject(Dir, Hit.Normal).GetSafeNormal()
-        : Dir;
-
-    FVector Delta = MoveDir * MoveSpeed * DeltaTime;
-    FHitResult MoveHit;
-    SetActorLocation(EnemyLoc + Delta, true, &MoveHit);
-
-    if (MoveHit.bBlockingHit)
+    if (Distance <= AcceptanceRadius)
     {
-        FVector Slide = FVector::VectorPlaneProject(
-            Delta * (1.f - MoveHit.Time), MoveHit.Normal
-        );
-        SetActorLocation(GetActorLocation() + Slide, true);
+        AttackTimer = 0.f;
+        State = EEnemyState::Attacking;
+
+        if (Spawner)
+        {
+            Spawner->SetAttackPaused(false);
+        }
     }
+}
+
+void AEnemyBase::UpdateAttack(float DeltaTime)
+{
+    if (Spawner)
+    {
+        Spawner->SetAttackPaused(false);
+    }
+
+    AttackTimer += DeltaTime;
+
+    if (AttackTimer >= AttackDuration)
+    {
+        ChooseNewDestination();
+
+        State = EEnemyState::Moving;
+
+        if (Spawner)
+        {
+            Spawner->SetAttackPaused(true);
+        }
+    }
+}
+
+void AEnemyBase::ChooseNewDestination()
+{
+    FVector Direction = FMath::VRand();
+
+    Direction.Z = 0.f;
+    Direction.Normalize();
+
+    TargetLocation =
+        GetActorLocation() +
+        Direction * RepositionDistance;
 }
