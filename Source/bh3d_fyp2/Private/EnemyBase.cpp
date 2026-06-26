@@ -1,21 +1,14 @@
 #include "EnemyBase.h"
 #include "CPP_Spawner.h"
-#include "MovementSequence.h"
-
 #include "Components/ChildActorComponent.h"
 
 AEnemyBase::AEnemyBase()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    RootComponent =
-        CreateDefaultSubobject<USceneComponent>(
-            TEXT("Root"));
+    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
-    SpawnerComponent =
-        CreateDefaultSubobject<UChildActorComponent>(
-            TEXT("Spawner"));
-
+    SpawnerComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("Spawner"));
     SpawnerComponent->SetupAttachment(RootComponent);
 }
 
@@ -23,14 +16,9 @@ void AEnemyBase::BeginPlay()
 {
     Super::BeginPlay();
 
-    SpawnLocation = GetActorLocation();
-
-    Spawner =
-        Cast<ACPP_Spawner>(
-            SpawnerComponent->GetChildActor());
+    Spawner = Cast<ACPP_Spawner>(SpawnerComponent->GetChildActor());
 
     CurrentPoint = 0;
-
     State = EEnemyState::Moving;
 
     if (Spawner)
@@ -48,7 +36,7 @@ void AEnemyBase::Tick(float DeltaTime)
         return;
     }
 
-    if (!MovementSequence->Points.IsValidIndex(CurrentPoint))
+    if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
     {
         return;
     }
@@ -67,24 +55,17 @@ void AEnemyBase::Tick(float DeltaTime)
 
 void AEnemyBase::UpdateMovement(float DeltaTime)
 {
-    const FMovementPoint& Point =
-        MovementSequence->Points[CurrentPoint];
+    const FMovementPoint& Point = MovementSequence->MovementPoints[CurrentPoint];
 
-    FVector Target =
-        SpawnLocation + Point.Offset;
+    FVector Target = Point.Offset;
 
-    FVector ToTarget =
-        Target - GetActorLocation();
-
-    float Distance =
-        ToTarget.Size();
+    FVector ToTarget = Target - GetActorLocation();
+    float Distance = ToTarget.Size();
 
     if (Distance <= AcceptanceRadius)
     {
         SetActorLocation(Target);
-
         AttackTimer = 0.f;
-
         State = EEnemyState::Attacking;
 
         if (Spawner)
@@ -95,23 +76,15 @@ void AEnemyBase::UpdateMovement(float DeltaTime)
         return;
     }
 
-    FVector Direction =
-        ToTarget.GetSafeNormal();
+    FVector Direction = ToTarget.GetSafeNormal();
+    float MoveDistance = FMath::Min(MoveSpeed * DeltaTime, Distance);
 
-    float MoveDistance =
-        FMath::Min(
-            MoveSpeed * DeltaTime,
-            Distance);
-
-    AddActorWorldOffset(
-        Direction * MoveDistance,
-        true);
+    AddActorWorldOffset(Direction * MoveDistance, true);
 }
 
 void AEnemyBase::UpdateAttack(float DeltaTime)
 {
-    const FMovementPoint& Point =
-        MovementSequence->Points[CurrentPoint];
+    const FMovementPoint& Point = MovementSequence->MovementPoints[CurrentPoint];
 
     AttackTimer += DeltaTime;
 
@@ -119,7 +92,7 @@ void AEnemyBase::UpdateAttack(float DeltaTime)
     {
         CurrentPoint++;
 
-        if (!MovementSequence->Points.IsValidIndex(CurrentPoint))
+        if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
         {
             Destroy();
             return;
