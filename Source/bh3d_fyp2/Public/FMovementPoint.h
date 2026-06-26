@@ -16,7 +16,15 @@ enum class EMovementCommand : uint8
 {
 	MoveTo UMETA(DisplayName = "Move to target"),
 	Wait UMETA(DisplayName = "Wait (stay in place)"),
-	SetOrigin UMETA(DisplayName = "Set new origin point")
+	SetOrigin UMETA(DisplayName = "Set new origin point"),
+	Skip UMETA(DisplayName = "Skip to next attack phase")
+};
+
+UENUM(BlueprintType)
+enum class EAttackDurationType : uint8
+{
+	Fixed UMETA(DisplayName = "Fixed duration in seconds"),
+	UntilPhase UMETA(DisplayName = "Until current attack phase completes")
 };
 
 USTRUCT(BlueprintType)
@@ -34,5 +42,11 @@ struct FMovementPoint
 	EMovementReference Reference = EMovementReference::Origin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EAttackDurationType DurationType = EAttackDurationType::Fixed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AttackDuration = 2.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bAttackWhileMoving = false;
 };

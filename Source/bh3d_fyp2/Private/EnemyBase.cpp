@@ -29,6 +29,8 @@ void AEnemyBase::BeginPlay()
 	{
 		Spawner->SetPaused(true);
 	}
+
+	bAttackPaused = true;
 }
 
 void AEnemyBase::Tick(float DeltaTime)
@@ -55,8 +57,12 @@ void AEnemyBase::Tick(float DeltaTime)
 			UpdateWaiting(DeltaTime);
 			break;
 
+		case EEnemyState::WaitingForPhase:
+			UpdateWaitingForPhase(DeltaTime);
+			break;
+
 		case EEnemyState::Attacking:
-			UpdateWaiting(DeltaTime);  // Same behavior for now
+			UpdateWaiting(DeltaTime);
 			break;
 	}
 }
@@ -66,7 +72,7 @@ void AEnemyBase::ComputeTarget(const FMovementPoint& Point, FVector& OutTarget)
 	switch (Point.Reference)
 	{
 		case EMovementReference::Origin:
-			// Origin-relative: SpawnOrigin + offset
+			// Origin-relative: CurrentOrigin + offset
 			OutTarget = CurrentOrigin + Point.Location;
 			break;
 
@@ -80,6 +86,48 @@ void AEnemyBase::ComputeTarget(const FMovementPoint& Point, FVector& OutTarget)
 			OutTarget = Point.Location;
 			break;
 	}
+}
+
+void AEnemyBase::PauseAttackSequence()
+{
+	if (!bAttackPaused && Spawner)
+	{
+		bAttackPaused = true;
+		Spawner->SetPaused(true);
+	}
+}
+
+void AEnemyBase::ResumeAttackSequence()
+{
+	if (bAttackPaused && Spawner)
+	{
+		bAttackPaused = false;
+		Spawner->SetPaused(false);
+	}
+}
+
+bool AEnemyBase::IsCurrentAttackPhaseComplete() const
+{
+	if (!Spawner)
+	{
+		return true;
+	}
+
+	// TODO: Implement phase completion check in CPP_Spawner
+	// For now, assume there's a method to check current phase status
+	// return Spawner->IsCurrentPhaseComplete();
+	return true;
+}
+
+void AEnemyBase::SkipToNextAttackPhase()
+{
+	if (!Spawner)
+	{
+		return;
+	}
+
+	// TODO: Implement phase skip in CPP_Spawner
+	// Spawner->SkipToNextPhase();
 }
 
 void AEnemyBase::UpdateMovement(float DeltaTime)
@@ -102,21 +150,43 @@ void AEnemyBase::UpdateMovement(float DeltaTime)
 		return;
 	}
 
-	// Handle Wait command
-	if (Point.Command == EMovementCommand::Wait)
+	// Handle Skip command
+	if (Point.Command == EMovementCommand::Skip)
 	{
-		AttackTimer = 0.f;
-		State = EEnemyState::Waiting;
+		SkipToNextAttackPhase();
+		CurrentPoint++;
 
-		if (Spawner)
+		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
 		{
-			Spawner->SetPaused(false);
+			Destroy();
+			return;
 		}
 
 		return;
 	}
 
+	// Handle Wait command
+	if (Point.Command == EMovementCommand::Wait)
+	{
+		// Resume attack for wait commands
+		ResumeAttackSequence();
+
+		AttackTimer = 0.f;
+		State = EEnemyState::Waiting;
+		return;
+	}
+
 	// Handle MoveTo command
+	// Manage attack pause/resume based on bAttackWhileMoving
+	if (!Point.bAttackWhileMoving)
+	{
+		PauseAttackSequence();
+	}
+	else
+	{
+		ResumeAttackSequence();
+	}
+
 	FVector Target;
 	ComputeTarget(Point, Target);
 
@@ -128,11 +198,19 @@ void AEnemyBase::UpdateMovement(float DeltaTime)
 		// Arrive at target
 		SetActorLocation(Target);
 		AttackTimer = 0.f;
-		State = EEnemyState::Attacking;
 
-		if (Spawner)
+		// Determine next state based on attack duration type
+		if (Point.DurationType == EAttackDurationType::UntilPhase)
 		{
-			Spawner->SetPaused(false);
+			// Wait for phase to complete
+			ResumeAttackSequence();
+			State = EEnemyState::WaitingForPhase;
+		}
+		else
+		{
+			// Fixed duration
+			ResumeAttackSequence();
+			State = EEnemyState::Attacking;
 		}
 
 		return;
@@ -151,7 +229,9 @@ void AEnemyBase::UpdateWaiting(float DeltaTime)
 
 	AttackTimer += DeltaTime;
 
-	if (AttackTimer >= Point.AttackDuration)
+	float Duration = Point.AttackDuration;
+
+	if (AttackTimer >= Duration)
 	{
 		CurrentPoint++;
 
@@ -162,10 +242,21 @@ void AEnemyBase::UpdateWaiting(float DeltaTime)
 		}
 
 		State = EEnemyState::Moving;
+	}
+}
 
-		if (Spawner)
+void AEnemyBase::UpdateWaitingForPhase(float DeltaTime)
+{
+	if (IsCurrentAttackPhaseComplete())
+	{
+		CurrentPoint++;
+
+		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
 		{
-			Spawner->SetPaused(true);
+			Destroy();
+			return;
 		}
+
+		State = EEnemyState::Moving;
 	}
 }

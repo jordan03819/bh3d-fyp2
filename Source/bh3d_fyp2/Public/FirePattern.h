@@ -44,6 +44,20 @@
  *
  * You only need entries for beams you wish to customise.
  *
+ * ── Text Import (CustomDirections only) ──────────────────────────────────
+ *
+ * ImportText format (one direction per line, X Y Z):
+ *
+ *   1 0 0
+ *   0 1 0
+ *   0 0 1
+ *   -1 0 0
+ *
+ * Lines beginning with # are ignored. Empty lines are ignored.
+ * Values are normalized at parse time, so actual magnitudes don't matter.
+ *
+ * Click Rebuild to parse ImportText → CustomDirections.
+ *
  * ── Common setups ─────────────────────────────────────────────────────────
  *
  *   Flat 8-way ring:
@@ -79,9 +93,27 @@ public:
      *
      * SpinRate and OffsetAngle still apply — the whole set of directions
      * is rotated around SpinAxis at runtime.
+     *
+     * To import from text: paste into ImportText, then call Rebuild().
      */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pattern|CustomGeometry")
     TArray<FVector> CustomDirections;
+
+    /**
+     * Plain text import format for CustomDirections.
+     * Format: X Y Z (one direction per line, values are normalized)
+     *
+     * Example:
+     *   1 0 0
+     *   0 1 0
+     *   0 0 1
+     *   -1 0 0
+     *
+     * Lines beginning with # are comments. Empty lines are ignored.
+     */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pattern|Import",
+              meta=(MultiLine="true", EditCondition="true"))
+    FString ImportText;
 
     // ── Azimuth (parametric ring of beams) ────────────────────────────────
 
@@ -187,4 +219,20 @@ public:
      */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pattern|Beams")
     TArray<FBeamDefinition> BeamOverrides;
+
+    // ── Text import interface ─────────────────────────────────────────────
+
+    /**
+     * Parse ImportText and populate CustomDirections.
+     * Call this after pasting text into ImportText.
+     * Clears CustomDirections before parsing.
+     */
+    UFUNCTION(CallInEditor, Category="Import")
+    void Rebuild();
+
+    /**
+     * Clear all custom directions.
+     */
+    UFUNCTION(CallInEditor, Category="Import")
+    void Clear();
 };

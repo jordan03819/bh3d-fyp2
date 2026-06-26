@@ -13,7 +13,8 @@ enum class EEnemyState : uint8
 {
 	Moving,
 	Attacking,
-	Waiting
+	Waiting,
+	WaitingForPhase
 };
 
 UCLASS()
@@ -48,6 +49,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
 	FVector CurrentOrigin = FVector::ZeroVector;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Attack")
+	bool bAttackPaused = false;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UChildActorComponent* SpawnerComponent;
@@ -57,7 +61,12 @@ protected:
 
 	void UpdateMovement(float DeltaTime);
 	void UpdateWaiting(float DeltaTime);
+	void UpdateWaitingForPhase(float DeltaTime);
 	void ComputeTarget(const FMovementPoint& Point, FVector& OutTarget);
+	bool IsCurrentAttackPhaseComplete() const;
+	void SkipToNextAttackPhase();
+	void PauseAttackSequence();
+	void ResumeAttackSequence();
 
 private:
 	float AttackTimer = 0.f;

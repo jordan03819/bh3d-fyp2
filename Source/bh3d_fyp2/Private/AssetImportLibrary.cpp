@@ -80,34 +80,60 @@ bool UAssetImportLibrary::ParseMovementLine(
 		OutPoint.Command = EMovementCommand::SetOrigin;
 		OutPoint.Location = FVector::ZeroVector;
 		OutPoint.Reference = EMovementReference::Origin;
+		OutPoint.DurationType = EAttackDurationType::Fixed;
 		OutPoint.AttackDuration = 0.f;
+		OutPoint.bAttackWhileMoving = false;
 		return true;
 	}
 
-	// wait command (duration only)
+	// skip command (no parameters)
+	if (Keyword == TEXT("skip"))
+	{
+		OutPoint.Command = EMovementCommand::Skip;
+		OutPoint.Location = FVector::ZeroVector;
+		OutPoint.Reference = EMovementReference::Origin;
+		OutPoint.DurationType = EAttackDurationType::Fixed;
+		OutPoint.AttackDuration = 0.f;
+		OutPoint.bAttackWhileMoving = false;
+		return true;
+	}
+
+	// wait command (duration or "phase")
 	if (Keyword == TEXT("wait"))
 	{
 		if (Tokens.Num() < 2)
 		{
-			OutError = FString::Printf(TEXT("Line %d: 'wait' requires a duration"), LineNumber);
+			OutError = FString::Printf(TEXT("Line %d: 'wait' requires duration or 'phase'"), LineNumber);
 			return false;
 		}
 
-		float Duration;
-		if (!StringToFloat(Tokens[1], Duration, OutError))
+		FString DurationToken = Tokens[1].ToLower();
+
+		if (DurationToken == TEXT("phase"))
 		{
-			OutError = FString::Printf(TEXT("Line %d, wait duration: %s"), LineNumber, *OutError);
-			return false;
+			OutPoint.DurationType = EAttackDurationType::UntilPhase;
+		}
+		else
+		{
+			float Duration;
+			FString TempError;
+			if (!StringToFloat(Tokens[1], Duration, TempError))
+			{
+				OutError = FString::Printf(TEXT("Line %d, wait parameter: %s"), LineNumber, *TempError);
+				return false;
+			}
+			OutPoint.DurationType = EAttackDurationType::Fixed;
+			OutPoint.AttackDuration = Duration;
 		}
 
 		OutPoint.Command = EMovementCommand::Wait;
 		OutPoint.Location = FVector::ZeroVector;
 		OutPoint.Reference = EMovementReference::Origin;
-		OutPoint.AttackDuration = Duration;
+		OutPoint.bAttackWhileMoving = false;
 		return true;
 	}
 
-	// Movement commands: origin, move, absolute (all require X Y Z Duration)
+	// Movement commands: origin, move, absolute
 	EMovementReference Reference;
 
 	if (Keyword == TEXT("origin"))
@@ -125,21 +151,21 @@ bool UAssetImportLibrary::ParseMovementLine(
 	else
 	{
 		OutError = FString::Printf(
-			TEXT("Line %d: Unknown keyword '%s'. Expected 'origin', 'move', 'absolute', 'wait', or 'setorigin'"),
+			TEXT("Line %d: Unknown keyword '%s'. Expected 'origin', 'move', 'absolute', 'wait', 'setorigin', or 'skip'"),
 			LineNumber, *Keyword);
 		return false;
 	}
 
-	// Parse X Y Z Duration for movement commands
-	if (Tokens.Num() != 5)
+	// Parse X Y Z DurationOrPhase Parallel for movement commands
+	if (Tokens.Num() != 6)
 	{
 		OutError = FString::Printf(
-			TEXT("Line %d: '%s' requires 4 values (X Y Z AttackDuration), got %d"),
+			TEXT("Line %d: '%s' requires 5 values (X Y Z AttackDuration|phase Parallel), got %d"),
 			LineNumber, *Keyword, Tokens.Num() - 1);
 		return false;
 	}
 
-	float X, Y, Z, Duration;
+	float X, Y, Z;
 	FString TempError;
 
 	if (!StringToFloat(Tokens[1], X, TempError))
@@ -160,16 +186,44 @@ bool UAssetImportLibrary::ParseMovementLine(
 		return false;
 	}
 
-	if (!StringToFloat(Tokens[4], Duration, TempError))
+	// Parse duration or "phase"
+	FString DurationToken = Tokens[4].ToLower();
+
+	if (DurationToken == TEXT("phase"))
 	{
-		OutError = FString::Printf(TEXT("Line %d, AttackDuration: %s"), LineNumber, *TempError);
+		OutPoint.DurationType = EAttackDurationType::UntilPhase;
+		OutPoint.AttackDuration = 0.f;  // Not used for phase wait
+	}
+	else
+	{
+		float Duration;
+		if (!StringToFloat(Tokens[4], Duration, TempError))
+		{
+			OutError = FString::Printf(TEXT("Line %d, AttackDuration: %s"), LineNumber, *TempError);
+			return false;
+		}
+		OutPoint.DurationType = EAttackDurationType::Fixed;
+		OutPoint.AttackDuration = Duration;
+	}
+
+	// Parse parallel flag (0 or 1)
+	int32 ParallelFlag;
+	if (!StringToInt(Tokens[5], ParallelFlag, TempError))
+	{
+		OutError = FString::Printf(TEXT("Line %d, Parallel flag: must be 0 or 1"), LineNumber);
+		return false;
+	}
+
+	if (ParallelFlag != 0 && ParallelFlag != 1)
+	{
+		OutError = FString::Printf(TEXT("Line %d, Parallel flag: must be 0 or 1, got %d"), LineNumber, ParallelFlag);
 		return false;
 	}
 
 	OutPoint.Command = EMovementCommand::MoveTo;
 	OutPoint.Location = FVector(X, Y, Z);
 	OutPoint.Reference = Reference;
-	OutPoint.AttackDuration = Duration;
+	OutPoint.bAttackWhileMoving = (ParallelFlag != 0);
 	return true;
 }
 
