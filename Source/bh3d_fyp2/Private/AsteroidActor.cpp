@@ -18,7 +18,8 @@ AAsteroidActor::AAsteroidActor()
 	// Physics settings
 	AsteroidMesh->SetSimulatePhysics(true);
 	AsteroidMesh->SetEnableGravity(false);
-	AsteroidMesh->SetConstrainedAxes(EAxes::None); // No axis locks
+	
+	// Unlock all translation and rotation axes
 	AsteroidMesh->BodyInstance.bLockXTranslation = false;
 	AsteroidMesh->BodyInstance.bLockYTranslation = false;
 	AsteroidMesh->BodyInstance.bLockZTranslation = false;
@@ -27,29 +28,34 @@ AAsteroidActor::AAsteroidActor()
 	AsteroidMesh->BodyInstance.bLockZRotation = false;
 
 	// Collision settings
-	AsteroidMesh->SetCollisionEnabled(ECC_WorldDynamic);
+	AsteroidMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AsteroidMesh->SetCollisionObjectType(ECC_WorldDynamic); // Physics Actor
-	AsteroidMesh->SetCollisionResponseToAllChannels(ECC_Ignore);
-	AsteroidMesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECC_Block); // Bounce off level walls
-	AsteroidMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECC_Block); // Bounce off dynamic objects
-	AsteroidMesh->SetCollisionResponseToChannel(ECC_Pawn, ECC_Block); // Bounce off player/enemies
+	AsteroidMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+	AsteroidMesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); // Bounce off level walls
+	AsteroidMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block); // Bounce off dynamic objects
 
 	// Generate hit events
 	AsteroidMesh->SetGenerateOverlapEvents(false);
-	AsteroidMesh->BodyInstance.bGeneratePhysicsData = true;
 
 	// Damping (critical for space behavior)
 	AsteroidMesh->BodyInstance.LinearDamping = 0.0f; // No velocity decay
 	AsteroidMesh->BodyInstance.AngularDamping = 0.0f; // No rotation decay
 
-	// Restitution (bounciness)
-	AsteroidMesh->BodyInstance.Restitution = 0.95f; // 95% energy retention on bounce
+	// Restitution (bounciness) - set via physics material or in Details
+	// Note: Set restitution in a Physics Material and assign it, or set per-instance in Blueprint
 
 	// Mass
 	AsteroidMesh->SetMassScale(NAME_None, AsteroidMass);
 
 	// Max angular velocity (prevent physics engine from clamping spins)
 	AsteroidMesh->BodyInstance.MaxAngularVelocity = 500.0f;
+
+	// NOTE: Create a Physics Material in Unreal with:
+	// - Friction: 0.0
+	// - Restitution: 0.95
+	// - Damping Linear: 0.0
+	// - Damping Angular: 0.0
+	// Then assign it in BP_Asteroid Details > Collision > Physics Material
 
 	// Bind collision callback
 	AsteroidMesh->OnComponentHit.AddDynamic(this, &AAsteroidActor::OnAsteroidHit);

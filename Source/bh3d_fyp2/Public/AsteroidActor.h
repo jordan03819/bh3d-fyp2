@@ -5,7 +5,7 @@
 #include "AsteroidActor.generated.h"
 
 UCLASS()
-class YOURPROJECTNAME_API AAsteroidActor : public AActor
+class BH3D_FYP2_API AAsteroidActor : public AActor
 {
 	GENERATED_BODY()
 
