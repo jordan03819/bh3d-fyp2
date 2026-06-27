@@ -113,7 +113,10 @@ bool AEnemyBase::IsCurrentAttackPhaseComplete() const
 		return true;
 	}
 
-	return Spawner->IsCurrentPhaseComplete();
+	// The spawner clears bWaitingForPhaseCompletion in AdvancePhase().
+	// We registered via WaitForPhaseCompletion() on arrival, so if the flag
+	// is now false, the phase has advanced and we can proceed.
+	return !Spawner->IsWaitingForPhaseCompletion();
 }
 
 void AEnemyBase::SkipToNextAttackPhase()
@@ -124,6 +127,59 @@ void AEnemyBase::SkipToNextAttackPhase()
 	}
 
 	Spawner->SkipToNextPhase();
+}
+
+void AEnemyBase::UpdateWaitingForPhase(float DeltaTime)
+{
+	if (!Spawner)
+	{
+		// No spawner — just advance
+		CurrentPoint++;
+		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
+		{
+			Destroy();
+			return;
+		}
+		bPhaseWaitRegistered = false;
+		State = EEnemyState::Moving;
+		return;
+	}
+
+	if (!bPhaseWaitRegistered)
+	{
+		// First tick in this state: register the wait with the spawner.
+		// WaitForPhaseCompletion() sets bWaitingForPhaseCompletion = true.
+		// AdvancePhase() clears it — that's the signal the phase has finished.
+		Spawner->WaitForPhaseCompletion();
+		bPhaseWaitRegistered = true;
+		return;
+	}
+
+	// Flag was cleared by AdvancePhase() — phase is done, advance movement.
+	if (!Spawner->IsWaitingForPhaseCompletion())
+	{
+		bPhaseWaitRegistered = false;
+		CurrentPoint++;
+
+		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
+		{
+			Destroy();
+			return;
+		}
+
+		State = EEnemyState::Moving;
+
+		// Peek at next point to set correct pause state
+		const FMovementPoint& Next = MovementSequence->MovementPoints[CurrentPoint];
+		if (Next.Command == EMovementCommand::MoveTo && Next.bAttackWhileMoving)
+		{
+			ResumeAttackSequence();
+		}
+		else
+		{
+			PauseAttackSequence();
+		}
+	}
 }
 
 void AEnemyBase::UpdateMovement(float DeltaTime)
@@ -232,33 +288,6 @@ void AEnemyBase::UpdateWaiting(float DeltaTime)
 		// Peek at next point: if it's a MoveTo with parallel=1, keep firing;
 		// otherwise pause. For non-MoveTo commands (setorigin, skip, wait)
 		// we default to pausing — UpdateMovement will correct it immediately.
-		const FMovementPoint& Next = MovementSequence->MovementPoints[CurrentPoint];
-		if (Next.Command == EMovementCommand::MoveTo && Next.bAttackWhileMoving)
-		{
-			ResumeAttackSequence();
-		}
-		else
-		{
-			PauseAttackSequence();
-		}
-	}
-}
-
-void AEnemyBase::UpdateWaitingForPhase(float DeltaTime)
-{
-	if (IsCurrentAttackPhaseComplete())
-	{
-		CurrentPoint++;
-
-		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
-		{
-			Destroy();
-			return;
-		}
-
-		State = EEnemyState::Moving;
-
-		// Same peek logic as UpdateWaiting
 		const FMovementPoint& Next = MovementSequence->MovementPoints[CurrentPoint];
 		if (Next.Command == EMovementCommand::MoveTo && Next.bAttackWhileMoving)
 		{

@@ -70,4 +70,9 @@ protected:
 
 private:
 	float AttackTimer = 0.f;
+
+	// True after we've called WaitForPhaseCompletion() on the spawner.
+	// Cleared when the spawner's flag is cleared by AdvancePhase(), which
+	// is the signal that the phase we were waiting for has finished.
+	bool bPhaseWaitRegistered = false;
 };
