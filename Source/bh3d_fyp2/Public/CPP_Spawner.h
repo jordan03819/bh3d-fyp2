@@ -78,6 +78,57 @@ public:
     UFUNCTION(BlueprintCallable, Category="BulletSystem|Spawner")
     void SetPaused(bool bPause);
 
+    /**
+     * Immediately skip to the next phase, bypassing any remaining shots in current phase.
+     * Safe to call at any time. Does nothing if already at the last phase.
+     * Useful for phase transitions triggered by external events (e.g., boss health thresholds).
+     */
+    UFUNCTION(BlueprintCallable, Category="BulletSystem|Spawner")
+    void SkipToNextPhase();
+
+    /**
+     * Immediately skip to a specific phase by index.
+     * Resets phase timer, shot counter, and spin angle.
+     * Does nothing if index is out of bounds.
+     *
+     * @param PhaseIndex  The target phase index (0-based).
+     * Useful for boss patterns where health thresholds trigger phase jumps.
+     */
+    UFUNCTION(BlueprintCallable, Category="BulletSystem|Spawner")
+    void SkipToPhase(int32 PhaseIndex);
+
+    /**
+     * Wait until the current phase completes before advancing.
+     * This is a hint to external systems that the spawner is in a "wait for completion" state.
+     * Primarily useful for choreography that needs to synchronize with movement or events.
+     * Call this before starting a movement pattern to ensure phase alignment.
+     *
+     * Note: The spawner already waits for phases to complete naturally.
+     * This is here for explicit external synchronization.
+     *
+     * @return true if successfully marked as waiting, false if already waiting or sequence finished.
+     */
+    UFUNCTION(BlueprintCallable, Category="BulletSystem|Spawner")
+    bool WaitForPhaseCompletion();
+
+    /**
+     * Check if the spawner is currently waiting for phase completion.
+     *
+     * @return true if phase completion is being awaited.
+     */
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category="BulletSystem|Spawner")
+    bool IsWaitingForPhaseCompletion() const;
+
+    /**
+     * Check if the current phase has completed all its shots.
+     * A phase is complete when ShotCount >= 0 and ShotsThisPhase >= ShotCount.
+     * Used for synchronizing movement patterns with attack phases.
+     *
+     * @return true if the current phase has fired all its shots and is ready to advance.
+     */
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category="BulletSystem|Spawner")
+    bool IsCurrentPhaseComplete() const;
+
     // ── Blueprint hooks ───────────────────────────────────────────────────
 
     /**
@@ -125,6 +176,13 @@ private:
     float AccumSpinAngle = 0.f;
 
     bool bPaused = false;
+
+    /**
+     * Flag indicating that external systems are waiting for the current phase
+     * to complete before advancing. This is a signal for synchronization,
+     * not a blocker — the phase will advance normally when finished.
+     */
+    bool bWaitingForPhaseCompletion = false;
 
     // ── Internal helpers ──────────────────────────────────────────────────
 

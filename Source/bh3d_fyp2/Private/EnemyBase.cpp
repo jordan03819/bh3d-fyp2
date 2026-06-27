@@ -113,10 +113,7 @@ bool AEnemyBase::IsCurrentAttackPhaseComplete() const
 		return true;
 	}
 
-	// TODO: Implement phase completion check in CPP_Spawner
-	// For now, assume there's a method to check current phase status
-	// return Spawner->IsCurrentPhaseComplete();
-	return true;
+	return Spawner->IsCurrentPhaseComplete();
 }
 
 void AEnemyBase::SkipToNextAttackPhase()
@@ -126,8 +123,7 @@ void AEnemyBase::SkipToNextAttackPhase()
 		return;
 	}
 
-	// TODO: Implement phase skip in CPP_Spawner
-	// Spawner->SkipToNextPhase();
+	Spawner->SkipToNextPhase();
 }
 
 void AEnemyBase::UpdateMovement(float DeltaTime)
@@ -177,15 +173,10 @@ void AEnemyBase::UpdateMovement(float DeltaTime)
 	}
 
 	// Handle MoveTo command
-	// Manage attack pause/resume based on bAttackWhileMoving
-	if (!Point.bAttackWhileMoving)
-	{
-		PauseAttackSequence();
-	}
-	else
-	{
-		ResumeAttackSequence();
-	}
+	// Note: pause/resume is set once on transition into Moving state (from
+	// UpdateWaiting/UpdateWaitingForPhase), not re-applied every frame.
+	// If bAttackWhileMoving is true, the spawner was unpaused before entering
+	// this state; if false, it was paused.
 
 	FVector Target;
 	ComputeTarget(Point, Target);
@@ -195,21 +186,17 @@ void AEnemyBase::UpdateMovement(float DeltaTime)
 
 	if (Distance <= AcceptanceRadius)
 	{
-		// Arrive at target
+		// Arrived at waypoint — always unpause to attack here
 		SetActorLocation(Target);
 		AttackTimer = 0.f;
+		ResumeAttackSequence();
 
-		// Determine next state based on attack duration type
 		if (Point.DurationType == EAttackDurationType::UntilPhase)
 		{
-			// Wait for phase to complete
-			ResumeAttackSequence();
 			State = EEnemyState::WaitingForPhase;
 		}
 		else
 		{
-			// Fixed duration
-			ResumeAttackSequence();
 			State = EEnemyState::Attacking;
 		}
 
@@ -229,9 +216,7 @@ void AEnemyBase::UpdateWaiting(float DeltaTime)
 
 	AttackTimer += DeltaTime;
 
-	float Duration = Point.AttackDuration;
-
-	if (AttackTimer >= Duration)
+	if (AttackTimer >= Point.AttackDuration)
 	{
 		CurrentPoint++;
 
@@ -242,6 +227,20 @@ void AEnemyBase::UpdateWaiting(float DeltaTime)
 		}
 
 		State = EEnemyState::Moving;
+
+		// Set correct pause state for the upcoming movement.
+		// Peek at next point: if it's a MoveTo with parallel=1, keep firing;
+		// otherwise pause. For non-MoveTo commands (setorigin, skip, wait)
+		// we default to pausing — UpdateMovement will correct it immediately.
+		const FMovementPoint& Next = MovementSequence->MovementPoints[CurrentPoint];
+		if (Next.Command == EMovementCommand::MoveTo && Next.bAttackWhileMoving)
+		{
+			ResumeAttackSequence();
+		}
+		else
+		{
+			PauseAttackSequence();
+		}
 	}
 }
 
@@ -258,5 +257,16 @@ void AEnemyBase::UpdateWaitingForPhase(float DeltaTime)
 		}
 
 		State = EEnemyState::Moving;
+
+		// Same peek logic as UpdateWaiting
+		const FMovementPoint& Next = MovementSequence->MovementPoints[CurrentPoint];
+		if (Next.Command == EMovementCommand::MoveTo && Next.bAttackWhileMoving)
+		{
+			ResumeAttackSequence();
+		}
+		else
+		{
+			PauseAttackSequence();
+		}
 	}
 }

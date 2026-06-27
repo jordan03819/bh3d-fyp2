@@ -34,6 +34,63 @@ void ACPP_Spawner::SetPaused(bool bPause)
     bPaused = bPause;
 }
 
+void ACPP_Spawner::SkipToNextPhase()
+{
+    SkipToPhase(CurrentPhaseIndex + 1);
+}
+
+void ACPP_Spawner::SkipToPhase(int32 PhaseIndex)
+{
+    if (!Sequence) return;
+    if (!Sequence->Phases.IsValidIndex(PhaseIndex)) return;
+
+    CurrentPhaseIndex = PhaseIndex;
+    ShotsThisPhase = 0;
+    AccumSpinAngle = 0.f;
+    bWaitingForPhaseCompletion = false;
+
+    const FAttackPhase& Phase = Sequence->Phases[CurrentPhaseIndex];
+    PhaseTimer = -Phase.StartDelay;
+
+    OnPhaseStarted(CurrentPhaseIndex);
+}
+
+bool ACPP_Spawner::WaitForPhaseCompletion()
+{
+    if (!Sequence || !Sequence->Phases.IsValidIndex(CurrentPhaseIndex))
+    {
+        return false;
+    }
+
+    bWaitingForPhaseCompletion = true;
+    return true;
+}
+
+bool ACPP_Spawner::IsWaitingForPhaseCompletion() const
+{
+    return bWaitingForPhaseCompletion;
+}
+
+bool ACPP_Spawner::IsCurrentPhaseComplete() const
+{
+    if (!Sequence || !Sequence->Phases.IsValidIndex(CurrentPhaseIndex))
+    {
+        return true;  // No phase = complete
+    }
+
+    const FAttackPhase& Phase = Sequence->Phases[CurrentPhaseIndex];
+
+    // A phase is complete when it has fired all its shots
+    // ShotCount < 0 means infinite shots (never complete)
+    if (Phase.ShotCount < 0)
+    {
+        return false;
+    }
+
+    // Phase is complete when we've fired all required shots
+    return ShotsThisPhase >= Phase.ShotCount;
+}
+
 // ── Tick ──────────────────────────────────────────────────────────────────
 
 void ACPP_Spawner::Tick(float DeltaTime)
@@ -113,6 +170,7 @@ void ACPP_Spawner::AdvancePhase()
     CurrentPhaseIndex++;
     ShotsThisPhase = 0;
     AccumSpinAngle = 0.f;
+    bWaitingForPhaseCompletion = false;
 
     if (Sequence->Phases.IsValidIndex(CurrentPhaseIndex))
     {
