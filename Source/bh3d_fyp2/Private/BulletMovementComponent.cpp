@@ -127,6 +127,23 @@ void UBulletMovementComponent::UpdateMotion_Implementation(float DeltaTime)
     // ── Position + Rotation ───────────────────────────────────────────────
     const FVector NewLocation = Owner->GetActorLocation() + Velocity * DeltaTime;
 
+    // ── World border cull ─────────────────────────────────────────────────
+    // Half-extents match the blocking volume: scale 3000,3000,2250 on a unit box.
+    // Checked against NewLocation so we cull before the SetActorLocation call,
+    // costing no extra position read — we already have the value.
+    if (FMath::Abs(NewLocation.X) > 3000.f ||
+        FMath::Abs(NewLocation.Y) > 3000.f ||
+        FMath::Abs(NewLocation.Z) > 2250.f)
+    {
+        SetComponentTickEnabled(false);
+        ACPP_BulletManager* Manager = ACPP_BulletManager::Get(this);
+        if (Manager)
+            Manager->ReturnBullet(Cast<ACPP_Bullet>(Owner));
+        else
+            Owner->Destroy();
+        return;
+    }
+
     // CHANGED: was two separate calls:
     //   Owner->SetActorLocation(NewLocation);             ← ETeleportType::None → UpdateOverlaps
     //   Owner->SetActorRotation(Velocity.Rotation());     ← ETeleportType::None → UpdateOverlaps again
