@@ -99,16 +99,25 @@ public:
     void ReturnAllBullets();
 
     /**
-     * Sphere-overlap query against the "EnemyBullet" collision channel.
+     * Sphere-distance query against every active bullet, done as a plain
+     * array scan over ActiveComponents — no physics engine involved.
      *
-     * Call this ONCE per frame from the player character (or enemy) instead of
-     * responding to per-bullet overlap events.  Internally it runs one
-     * OverlapMultiByObjectType call and filters by the "EnemyBullet" ActorTag —
-     * the "use tags" part your advisor mentioned.
+     * CHANGED: this used to be a physics OverlapMultiByObjectType against
+     * a live collision body per bullet. That meant every bullet needed
+     * SetActorEnableCollision(true) while active, which costs a
+     * Phys SetBodyTransform sync every time the bullet moves. Since we
+     * already track every active bullet's owning actor in ActiveComponents
+     * (added for the tick refactor), we can just check distance directly —
+     * same O(N) cost as the overlap query's broad-phase, minus the physics
+     * body entirely. Bullets no longer need collision enabled at all.
+     *
+     * BulletHitRadius is added to Radius so a bullet still counts as "hit"
+     * when its edge (not just its exact centre) reaches the query sphere —
+     * this restores the reach the old shape-overlap check gave you for free.
      *
      * @param Centre      Hit-detection origin (e.g. player capsule centre).
      * @param Radius      Hitbox radius in cm.
-     * @param OutBullets  Filled with all bullets overlapping the sphere.
+     * @param OutBullets  Filled with all bullets within (Radius + BulletHitRadius) of Centre.
      */
     UFUNCTION(BlueprintCallable, Category="Bullet Pool")
     void QueryBulletsAt(const FVector& Centre, float Radius,

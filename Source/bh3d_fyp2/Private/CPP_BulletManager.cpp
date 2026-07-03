@@ -5,21 +5,19 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 
-// ─── Collision channel ────────────────────────────────────────────────────────
+// ─── Bullet tag ───────────────────────────────────────────────────────────────
 //
-// Add a custom Object Channel called "EnemyBullet" in:
-//   Project Settings → Engine → Collision → Object Channels → New Channel
-//   Name: EnemyBullet | Default Response: Ignore
-//
-// UE assigns it to the next free ECC_GameTraceChannel slot.
-// Match the index below to whatever slot it gets assigned.
-// Check DefaultEngine.ini: +DefaultChannelResponses=(Channel=ECC_GameTraceChannel1,...)
-//
-static constexpr ECollisionChannel BULLET_OBJECT_CHANNEL = ECC_GameTraceChannel1;
-
-// ActorTag set on every pooled bullet.  Used in QueryBulletsAt() to confirm
-// a result is a bullet without a Cast<> — which is what your advisor meant by "use tags".
+// ActorTag set on every pooled bullet. No longer used by QueryBulletsAt (see
+// below — that's array-based now), but left in place in case other code
+// (BP logic, VFX triggers, etc.) checks for it. Safe to remove if unused
+// elsewhere.
 static const FName BULLET_ACTOR_TAG = TEXT("EnemyBullet");
+
+// Half-extent (cm) added to every QueryBulletsAt radius check, approximating
+// the bullet's physical size now that hit detection is point-to-point.
+// Sized for the engine Cube mesh at scale (1.0, 0.16, 0.16):
+// 100cm * 0.16 / 2 = 8cm cross-section half-extent.
+static constexpr float BULLET_HIT_RADIUS = 8.0f;
 
 // ─── Constructor ──────────────────────────────────────────────────────────────
 
@@ -139,9 +137,11 @@ ACPP_Bullet* ACPP_BulletManager::FireBullet(TSubclassOf<ACPP_Bullet> BulletClass
         ETeleportType::TeleportPhysics
     );
 
-    // Un-hide and re-enable collision
+    // Un-hide. Collision is intentionally left disabled — QueryBulletsAt no
+    // longer uses physics overlaps (see below), so bullets never need a live
+    // physics body. This also removes the Phys SetBodyTransform cost that
+    // used to fire every time an active bullet moved.
     Bullet->SetActorHiddenInGame(false);
-    Bullet->SetActorEnableCollision(true);
 
     // Hand motion params to the movement component — same call the spawner used to make
     Bullet->InitializeBullet(Params);
@@ -192,6 +192,15 @@ void ACPP_BulletManager::ReturnAllBullets()
 }
 
 // ─── QueryBulletsAt ───────────────────────────────────────────────────────────
+//
+// CHANGED: array scan instead of a physics overlap. We already have every
+// active bullet's UBulletMovementComponent in ActiveComponents — GetOwner()
+// gives the actor, GetActorLocation() gives its position. No physics body,
+// no collision channel, no ActorTag check needed.
+//
+// If your bullets have different sizes, add a HitRadius field to
+// FBulletMotionParams and read it off MC->MotionParams here instead of
+// using a single flat Radius for every bullet.
 
 void ACPP_BulletManager::QueryBulletsAt(const FVector&        Centre,
                                          float                 Radius,
@@ -199,40 +208,22 @@ void ACPP_BulletManager::QueryBulletsAt(const FVector&        Centre,
 {
     OutBullets.Reset();
 
-    TArray<FOverlapResult> Overlaps;
+    // CHANGED: add BulletHitRadius so a bullet's edge (not just its exact
+    // centre point) counts as reaching the query sphere — approximates the
+    // reach the old box-vs-sphere overlap gave for free.
+    const float CombinedRadius = Radius + BULLET_HIT_RADIUS;
+    const float RadiusSq       = CombinedRadius * CombinedRadius;
 
-    // Named stat so this query shows up cleanly in the profiler
-    FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(BulletHitCheck),
-                                      /*bTraceComplex=*/false);
-    QueryParams.AddIgnoredActor(this);
-
-    // Only touches the "EnemyBullet" object channel — nothing else participates.
-    // This single call replaces N individual overlap events.
-    const FCollisionObjectQueryParams ObjectParams(BULLET_OBJECT_CHANNEL);
-
-    GetWorld()->OverlapMultiByObjectType(
-        Overlaps,
-        Centre,
-        FQuat::Identity,
-        ObjectParams,
-        FCollisionShape::MakeSphere(Radius),
-        QueryParams
-    );
-
-    for (const FOverlapResult& Hit : Overlaps)
+    for (UBulletMovementComponent* MC : ActiveComponents)
     {
-        AActor* HitActor = Hit.GetActor();
-        if (!IsValid(HitActor)) continue;
+        if (!IsValid(MC)) continue;
 
-        // ── "Use tags" — your advisor's advice ────────────────────────────
-        // ActorHasTag is a simple TArray<FName>::Contains — no RTTI, no vtable.
-        // We tagged every pooled bullet "EnemyBullet" in GrowPool(), so this
-        // confirms we got a bullet without a Cast<>.
-        if (HitActor->ActorHasTag(BULLET_ACTOR_TAG))
+        AActor* Owner = MC->GetOwner();
+        if (!IsValid(Owner)) continue;
+
+        if (FVector::DistSquared(Owner->GetActorLocation(), Centre) <= RadiusSq)
         {
-            // Cast is safe here because we know the class; we just use the tag
-            // to avoid the cast on every result before we confirm it's a bullet.
-            OutBullets.Add(static_cast<ACPP_Bullet*>(HitActor));
+            OutBullets.Add(static_cast<ACPP_Bullet*>(Owner));
         }
     }
 }
