@@ -266,6 +266,42 @@ void ACPP_Spawner::SpawnVolley(UFirePattern* Pattern)
         }
     }
 
+    // ── Apply player-facing Z reorientation if enabled ─────────────────────
+    //
+    // If the current phase has bFacePlayerOnZ set, replace the Z component of
+    // each beam direction with the Z of the vector pointing from the spawner
+    // toward the player pawn. This makes the pattern "aim" at the player
+    // vertically without altering its core XY geometry.
+    const FAttackPhase& CurrentPhase = Sequence->Phases[CurrentPhaseIndex];
+
+    if (CurrentPhase.bFacePlayerOnZ)
+    {
+        if (APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn())
+        {
+            FVector ToPlayer = (PlayerPawn->GetActorLocation() - Origin).GetSafeNormal();
+            
+            FVector PatternX = FVector::CrossProduct(FVector::UpVector, ToPlayer).GetSafeNormal();
+            if (PatternX.IsNearlyZero())
+            {
+                PatternX = GetActorForwardVector();
+            }
+            FVector PatternY = FVector::CrossProduct(ToPlayer, PatternX).GetSafeNormal();
+    
+            // Rotate the pattern 180° around the player-facing axis to correct
+            // orientation. Negating both perpendicular axes together preserves
+            // a valid right-handed frame (unlike negating only one, which mirrors it).
+            PatternX = -PatternX;
+            PatternY = -PatternY;
+            
+            FMatrix PatternFrame(PatternX, PatternY, ToPlayer, FVector::ZeroVector);
+            FQuat ReorientRot(PatternFrame);
+            
+            for (int32 i = 0; i < BeamDirs.Num(); i++)
+            {
+                BeamDirs[i] = ReorientRot.RotateVector(BeamDirs[i]).GetSafeNormal();
+            }
+        }
+    }
     // ── Fire each beam ────────────────────────────────────────────────────
     //
     // Fetch the manager once per volley.  All bullet acquisitions go through

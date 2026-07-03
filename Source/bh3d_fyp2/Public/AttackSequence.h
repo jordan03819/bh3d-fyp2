@@ -53,6 +53,17 @@ struct FAttackPhase
      */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Phase")
     bool bLoop = false;
+
+    /**
+     * If true, reorient the fire pattern so that the +Z direction points toward
+     * the player pawn. The pattern geometry is preserved; only the Z component
+     * of each beam direction is replaced with the normalized Z of the vector from
+     * spawner to player.
+     * Useful for making patterns "aim" vertically at the player without changing
+     * the pattern's core geometry.
+     */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Phase")
+    bool bFacePlayerOnZ = false;
 };
 
 
