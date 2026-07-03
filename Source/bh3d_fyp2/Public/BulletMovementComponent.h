@@ -27,12 +27,20 @@ class ACPP_BulletManager;
  *
  * ── Lifecycle ────────────────────────────────────────────────────────────
  *
- *   BulletManager::GrowPool() pre-spawns the bullet (tick disabled).
+ *   This component does NOT tick itself (PrimaryComponentTick.bCanEverTick
+ *   = false). ACPP_BulletManager keeps a flat list of active components and
+ *   calls UpdateMotion() on each of them from its own single Actor tick.
+ *   This collapses hundreds of per-component tick registrations into one.
+ *
+ *   BulletManager::GrowPool() pre-spawns the bullet (not yet registered).
  *   BulletManager::FireBullet() calls bullet->InitializeBullet(Params)
- *       → Initialize() here re-enables tick and sets initial velocity.
- *   TickComponent() calls UpdateMotion() every frame while the bullet is live.
+ *       → Initialize() here sets initial velocity, and the manager adds
+ *         this component to its ActiveComponents list.
+ *   BulletManager::Tick() calls UpdateMotion() on every active component
+ *       every frame while the bullet is live.
  *   On lifetime expiry, UpdateMotion calls BulletManager::ReturnBullet()
- *       → ResetForPool() here disables tick and clears state ready for reuse.
+ *       → ResetForPool() here clears state ready for reuse, and the
+ *         manager removes this component from ActiveComponents.
  */
 UCLASS(ClassGroup=(BulletSystem), Blueprintable,
        meta=(BlueprintSpawnableComponent))
@@ -55,29 +63,30 @@ public:
 
     /**
      * Called by ACPP_BulletManager when this bullet is returned to the pool.
-     * Disables tick and clears motion state so the next Initialize() starts clean.
+     * Clears motion state so the next Initialize() starts clean.
      * Do NOT call Destroy() — the manager reuses this actor.
      */
     UFUNCTION(BlueprintCallable, Category="BulletSystem|Movement")
     void ResetForPool();
 
-protected:
-    virtual void BeginPlay() override;
-
-    virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-                               FActorComponentTickFunction* ThisTickFunction) override;
-
     /**
-     * Core motion update called every tick.
-     * Override this in subclasses to implement custom movement behaviour.
-     * The base implementation provides: linear velocity, linear acceleration,
-     * speed cap, angular velocity (path curving), and lifetime expiry.
+     * Core motion update, called once per frame BY THE MANAGER — not by the
+     * component's own tick. ACPP_BulletManager loops all active components
+     * and calls this directly, which collapses N per-bullet tick
+     * registrations into a single Actor tick.
      *
-     * @param DeltaTime  Time elapsed since last tick, in seconds.
+     * Override this in subclasses exactly as before to implement custom
+     * movement behaviour (homing, sine wave, orbit, etc.) — nothing about
+     * how you extend this has changed.
+     *
+     * @param DeltaTime  Time elapsed since last update, in seconds.
      */
     UFUNCTION(BlueprintNativeEvent, Category="BulletSystem|Movement")
     void UpdateMotion(float DeltaTime);
     virtual void UpdateMotion_Implementation(float DeltaTime);
+
+protected:
+    virtual void BeginPlay() override;
 
     // ── State (accessible to subclasses) ──────────────────────────────────
 

@@ -4,12 +4,12 @@
 
 UBulletMovementComponent::UBulletMovementComponent()
 {
-    PrimaryComponentTick.bCanEverTick = true;
-
-    // Disable tick until the component is initialized by the spawner.
-    // This prevents UpdateMotion running on an uninitialized bullet.
-    // POOL: dormant bullets sitting in the free list also cost zero tick overhead.
-    PrimaryComponentTick.bStartWithTickEnabled = false;
+    // CHANGED: this component no longer ticks itself. ACPP_BulletManager
+    // calls UpdateMotion() directly on every active component from one
+    // Actor tick, instead of each bullet registering its own tick function.
+    // This removes per-bullet tick-graph overhead (registration, prereq
+    // sorting, dispatch) at scale — the math itself was already cheap.
+    PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UBulletMovementComponent::BeginPlay()
@@ -35,28 +35,22 @@ void UBulletMovementComponent::Initialize(const FBulletMotionParams& Params)
         Velocity     = Owner->GetActorForwardVector() * CurrentSpeed;
     }
 
-    // Now safe to tick.
-    SetComponentTickEnabled(true);
+    // CHANGED: no longer enables component tick here — BulletManager::FireBullet
+    // adds this component to its ActiveComponents list right after calling
+    // InitializeBullet(), which is what makes it start receiving UpdateMotion().
 }
 
 // POOL: called by BulletManager::DeactivateEntry instead of Owner->Destroy().
 void UBulletMovementComponent::ResetForPool()
 {
-    // Stop ticking immediately — no further UpdateMotion calls while dormant.
-    SetComponentTickEnabled(false);
-
     // Clear state so the next Initialize() starts completely clean.
+    // CHANGED: no tick to disable here anymore — BulletManager::DeactivateEntry
+    // removes this component from ActiveComponents, which stops UpdateMotion
+    // calls immediately.
     Velocity     = FVector::ZeroVector;
     CurrentSpeed = 0.f;
     ElapsedTime  = 0.f;
     bInitialized = false;
-}
-
-void UBulletMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                              FActorComponentTickFunction* ThisTickFunction)
-{
-    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-    UpdateMotion(DeltaTime);
 }
 
 void UBulletMovementComponent::UpdateMotion_Implementation(float DeltaTime)
@@ -71,10 +65,6 @@ void UBulletMovementComponent::UpdateMotion_Implementation(float DeltaTime)
     // ── Lifetime check ────────────────────────────────────────────────────
     if (MotionParams.Lifetime > 0.f && ElapsedTime >= MotionParams.Lifetime)
     {
-        // CHANGED: Disable tick first so no further frames run during the
-        // return-to-pool handoff.
-        SetComponentTickEnabled(false);
-
         // CHANGED: Return to pool instead of Destroy().
         // Destroy() is never called at runtime — BulletManager reuses the actor.
         // Falls back to Destroy() if no manager exists (e.g. PIE without manager).
@@ -135,7 +125,6 @@ void UBulletMovementComponent::UpdateMotion_Implementation(float DeltaTime)
         FMath::Abs(NewLocation.Y) > 3000.f ||
         FMath::Abs(NewLocation.Z) > 2250.f)
     {
-        SetComponentTickEnabled(false);
         ACPP_BulletManager* Manager = ACPP_BulletManager::Get(this);
         if (Manager)
             Manager->ReturnBullet(Cast<ACPP_Bullet>(Owner));

@@ -5,6 +5,7 @@
 #include "CPP_BulletManager.generated.h"
 
 class ACPP_Bullet;
+class UBulletMovementComponent;
 struct FBulletMotionParams;
 
 /**
@@ -13,8 +14,13 @@ struct FBulletMotionParams;
  * WHAT IT DOES
  *   1. Object Pool  — pre-spawns bullets so SpawnActor / Destroy never run at runtime.
  *   2. FireBullet() — pulls a dormant bullet from the free list, places it, calls
- *                     InitializeBullet(). Movement still runs inside the bullet's own
- *                     UBulletMovementComponent — we don't change that architecture.
+ *                     InitializeBullet(), then registers its UBulletMovementComponent
+ *                     in ActiveComponents. Movement math still lives entirely inside
+ *                     UBulletMovementComponent (and its subclasses) — unchanged.
+ *                     The only thing that moved is WHO calls UpdateMotion(): the
+ *                     manager's single Tick() now drives every active component
+ *                     directly, instead of each component ticking itself. This
+ *                     collapses N per-bullet tick registrations into 1.
  *   3. ReturnBullet() — deactivates and re-pools a bullet.  Called by:
  *                       • UBulletMovementComponent when lifetime expires (replaces Destroy)
  *                       • Player/enemy code on a hit
@@ -119,6 +125,12 @@ public:
 
     virtual void BeginPlay() override;
 
+    /**
+     * Drives every active bullet's movement in one pass.
+     * Replaces per-component TickComponent() — see UBulletMovementComponent.
+     */
+    virtual void Tick(float DeltaTime) override;
+
 private:
     // ─── Pool internals ───────────────────────────────────────────────────
 
@@ -139,6 +151,12 @@ private:
 
     // Reverse map: actor → {ClassPtr, EntryIndex} for O(1) ReturnBullet
     TMap<ACPP_Bullet*, TPair<UClass*, int32>> ActorToEntry;
+
+    // Flat list of every currently-active bullet's movement component.
+    // Tick() walks this once per frame and calls UpdateMotion() on each —
+    // this is what replaces per-component ticking.
+    UPROPERTY()
+    TArray<UBulletMovementComponent*> ActiveComponents;
 
     // Helpers
     void        GrowPool(TSubclassOf<ACPP_Bullet> Class, int32 Count);

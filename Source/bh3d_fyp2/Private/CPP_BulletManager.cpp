@@ -1,6 +1,6 @@
 #include "CPP_BulletManager.h"
 #include "CPP_Bullet.h"
-#include "BulletMovementComponent.h"   // for ResetForPool() call in DeactivateEntry
+#include "BulletMovementComponent.h"   // for ResetForPool() + UpdateMotion() + registration
 #include "BulletMotionParams.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
@@ -25,9 +25,12 @@ static const FName BULLET_ACTOR_TAG = TEXT("EnemyBullet");
 
 ACPP_BulletManager::ACPP_BulletManager()
 {
-    // The manager itself does not tick — movement still lives in each bullet's
-    // UBulletMovementComponent.  The manager is purely a lifecycle controller.
-    PrimaryActorTick.bCanEverTick = false;
+    // CHANGED: the manager now ticks — once, for every active bullet.
+    // UBulletMovementComponent no longer ticks itself (bCanEverTick = false
+    // there); this single Tick() calls UpdateMotion() on each active
+    // component directly instead. Same math, one tick registration instead
+    // of hundreds.
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 // ─── BeginPlay ────────────────────────────────────────────────────────────────
@@ -42,6 +45,34 @@ void ACPP_BulletManager::BeginPlay()
         {
             GrowPool(Class, PoolSizePerClass);
         }
+    }
+}
+
+// ─── Tick ─────────────────────────────────────────────────────────────────────
+//
+// Replaces per-bullet TickComponent(). We loop ActiveComponents backward so
+// that a component removing itself mid-loop (ReturnBullet → DeactivateEntry
+// → ActiveComponents.RemoveSingleSwap) is safe: RemoveSingleSwap moves the
+// current last element into the freed slot, and since we iterate from the
+// end, anything swapped in has already been ticked this frame.
+
+void ACPP_BulletManager::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    for (int32 i = ActiveComponents.Num() - 1; i >= 0; --i)
+    {
+        UBulletMovementComponent* MC = ActiveComponents[i];
+
+        // Defensive: shouldn't happen (bullets are pooled, not destroyed),
+        // but guards against a stray Destroy() call somewhere.
+        if (!IsValid(MC))
+        {
+            ActiveComponents.RemoveAtSwap(i, /*Count=*/1, /*bAllowShrinking=*/false);
+            continue;
+        }
+
+        MC->UpdateMotion(DeltaTime);
     }
 }
 
@@ -114,6 +145,14 @@ ACPP_Bullet* ACPP_BulletManager::FireBullet(TSubclassOf<ACPP_Bullet> BulletClass
 
     // Hand motion params to the movement component — same call the spawner used to make
     Bullet->InitializeBullet(Params);
+
+    // CHANGED: register this bullet's movement component so Tick() starts
+    // calling UpdateMotion() on it. The component itself never ticks.
+    if (UBulletMovementComponent* MC =
+            Bullet->FindComponentByClass<UBulletMovementComponent>())
+    {
+        ActiveComponents.AddUnique(MC);
+    }
 
     ActorToEntry.Add(Bullet, { BulletClass.Get(), Idx });
 
@@ -258,12 +297,14 @@ void ACPP_BulletManager::DeactivateEntry(UClass* Class, int32 Index)
         Entry.Actor->SetActorHiddenInGame(true);
         Entry.Actor->SetActorEnableCollision(false);
 
-        // Tell the movement component to disable its tick and wipe state.
-        // Without this a bullet returned mid-flight would still tick one more frame.
+        // Wipe motion state and, critically, unregister from ActiveComponents —
+        // that's what actually stops UpdateMotion() being called on this bullet
+        // next frame now that the component doesn't tick itself.
         if (UBulletMovementComponent* MC =
                 Entry.Actor->FindComponentByClass<UBulletMovementComponent>())
         {
             MC->ResetForPool();
+            ActiveComponents.RemoveSingleSwap(MC, /*bAllowShrinking=*/false);
         }
     }
 
