@@ -7,27 +7,17 @@ AAsteroidActor::AAsteroidActor()
 {
 	PrimaryActorTick.TickInterval = 0.0f;
 	PrimaryActorTick.bCanEverTick = true;
-
-	// Disable tick tocking by default (only enable if maintaining speed)
-	PrimaryActorTick.TickInterval = 0.016f; // ~60 FPS
+	PrimaryActorTick.TickInterval = 0.016f;
 
 	// Create and configure the mesh component
 	AsteroidMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AsteroidMesh"));
 	RootComponent = AsteroidMesh;
 
-	// Physics settings
+	// Physics settings — safe in constructor
 	AsteroidMesh->SetSimulatePhysics(true);
 	AsteroidMesh->SetEnableGravity(false);
 	
-	// Unlock all translation and rotation axes
-	AsteroidMesh->BodyInstance.bLockXTranslation = false;
-	AsteroidMesh->BodyInstance.bLockYTranslation = false;
-	AsteroidMesh->BodyInstance.bLockZTranslation = false;
-	AsteroidMesh->BodyInstance.bLockXRotation = false;
-	AsteroidMesh->BodyInstance.bLockYRotation = false;
-	AsteroidMesh->BodyInstance.bLockZRotation = false;
-
-	// Collision settings
+	// Collision settings — safe in constructor
 	AsteroidMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AsteroidMesh->SetCollisionObjectType(ECC_WorldDynamic); // Physics Actor
 	AsteroidMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -37,25 +27,11 @@ AAsteroidActor::AAsteroidActor()
 	// Generate hit events
 	AsteroidMesh->SetGenerateOverlapEvents(false);
 
-	// Damping (critical for space behavior)
-	AsteroidMesh->BodyInstance.LinearDamping = 0.0f; // No velocity decay
-	AsteroidMesh->BodyInstance.AngularDamping = 0.0f; // No rotation decay
 
-	// Restitution (bounciness) - set via physics material or in Details
-	// Note: Set restitution in a Physics Material and assign it, or set per-instance in Blueprint
-
-	// Mass
-	AsteroidMesh->SetMassScale(NAME_None, AsteroidMass);
-
-	// Max angular velocity (prevent physics engine from clamping spins)
-	AsteroidMesh->BodyInstance.MaxAngularVelocity = 500.0f;
-
-	// NOTE: Create a Physics Material in Unreal with:
-	// - Friction: 0.0
-	// - Restitution: 0.95
-	// - Damping Linear: 0.0
-	// - Damping Angular: 0.0
-	// Then assign it in BP_Asteroid Details > Collision > Physics Material
+	// NOTE: All BodyInstance access deferred to BeginPlay (via InitializePhysics)
+	// because accessing BodyInstance in the constructor triggers
+	// FBodyInstance::GetSimplePhysicalMaterial during CDO construction,
+	// before GEngine is initialized.
 
 	// Bind collision callback
 	AsteroidMesh->OnComponentHit.AddDynamic(this, &AAsteroidActor::OnAsteroidHit);
@@ -64,6 +40,7 @@ AAsteroidActor::AAsteroidActor()
 void AAsteroidActor::BeginPlay()
 {
 	Super::BeginPlay();
+	AsteroidMesh->SetMassScale(NAME_None, AsteroidMass);
 	InitializePhysics();
 }
 
@@ -83,6 +60,23 @@ void AAsteroidActor::InitializePhysics()
 	{
 		return;
 	}
+
+	// NOW safe to access BodyInstance (GEngine is initialized)
+	
+	// Unlock all translation and rotation axes
+	AsteroidMesh->BodyInstance.bLockXTranslation = false;
+	AsteroidMesh->BodyInstance.bLockYTranslation = false;
+	AsteroidMesh->BodyInstance.bLockZTranslation = false;
+	AsteroidMesh->BodyInstance.bLockXRotation = false;
+	AsteroidMesh->BodyInstance.bLockYRotation = false;
+	AsteroidMesh->BodyInstance.bLockZRotation = false;
+
+	// Damping (critical for space behavior)
+	AsteroidMesh->BodyInstance.LinearDamping = 0.0f; // No velocity decay
+	AsteroidMesh->BodyInstance.AngularDamping = 0.0f; // No rotation decay
+
+	// Max angular velocity (prevent physics engine from clamping spins)
+	AsteroidMesh->BodyInstance.MaxAngularVelocity = 500.0f;
 
 	// Random linear velocity
 	FVector RandomDirection = FMath::VRand(); // Random unit vector
