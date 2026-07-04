@@ -153,6 +153,7 @@ void ACPP_Spawner::StartSequence()
     CurrentPhaseIndex = 0;
     ShotsThisPhase    = 0;
     AccumSpinAngle    = 0.f;
+    bWaitingForPhaseCompletion = false;
 
     if (Sequence && Sequence->Phases.IsValidIndex(0))
     {

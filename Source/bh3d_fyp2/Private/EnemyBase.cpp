@@ -42,6 +42,15 @@ void AEnemyBase::Tick(float DeltaTime)
 		return;
 	}
 
+	// ReturningToSpawn runs after CurrentPoint has already run off the end
+	// of MovementPoints, so it must not be gated behind the
+	// IsValidIndex(CurrentPoint) check used by the other states below.
+	if (State == EEnemyState::ReturningToSpawn)
+	{
+		UpdateReturningToSpawn(DeltaTime);
+		return;
+	}
+
 	if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
 	{
 		return;
@@ -63,6 +72,9 @@ void AEnemyBase::Tick(float DeltaTime)
 
 		case EEnemyState::Attacking:
 			UpdateWaiting(DeltaTime);
+			break;
+
+		default:
 			break;
 	}
 }
@@ -137,7 +149,7 @@ void AEnemyBase::UpdateWaitingForPhase(float DeltaTime)
 		CurrentPoint++;
 		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
 		{
-			Destroy();
+			HandleSequenceComplete();
 			return;
 		}
 		bPhaseWaitRegistered = false;
@@ -163,7 +175,7 @@ void AEnemyBase::UpdateWaitingForPhase(float DeltaTime)
 
 		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
 		{
-			Destroy();
+			HandleSequenceComplete();
 			return;
 		}
 
@@ -194,7 +206,7 @@ void AEnemyBase::UpdateMovement(float DeltaTime)
 
 		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
 		{
-			Destroy();
+			HandleSequenceComplete();
 			return;
 		}
 
@@ -210,7 +222,7 @@ void AEnemyBase::UpdateMovement(float DeltaTime)
 
 		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
 		{
-			Destroy();
+			HandleSequenceComplete();
 			return;
 		}
 
@@ -278,7 +290,7 @@ void AEnemyBase::UpdateWaiting(float DeltaTime)
 
 		if (!MovementSequence->MovementPoints.IsValidIndex(CurrentPoint))
 		{
-			Destroy();
+			HandleSequenceComplete();
 			return;
 		}
 
@@ -298,4 +310,57 @@ void AEnemyBase::UpdateWaiting(float DeltaTime)
 			PauseAttackSequence();
 		}
 	}
+}
+
+void AEnemyBase::HandleSequenceComplete()
+{
+	if (bDestroyOnSequenceComplete)
+	{
+		// Old behavior: disappear immediately.
+		Destroy();
+		return;
+	}
+
+	// Stop attacking, then head straight back to SpawnOrigin over
+	// ReturnToSpawnDuration seconds — no firing during the return.
+	PauseAttackSequence();
+
+	ReturnTimer = 0.f;
+	ReturnStartLocation = GetActorLocation();
+	State = EEnemyState::ReturningToSpawn;
+}
+
+void AEnemyBase::UpdateReturningToSpawn(float DeltaTime)
+{
+	ReturnTimer += DeltaTime;
+
+	const float Duration = FMath::Max(ReturnToSpawnDuration, KINDA_SMALL_NUMBER);
+	const float Alpha = FMath::Clamp(ReturnTimer / Duration, 0.f, 1.f);
+
+	const FVector NewLocation = FMath::Lerp(ReturnStartLocation, SpawnOrigin, Alpha);
+	SetActorLocation(NewLocation);
+
+	if (Alpha >= 1.f)
+	{
+		ResetAttackSequence();
+	}
+}
+
+void AEnemyBase::ResetAttackSequence()
+{
+	CurrentPoint = 0;
+	CurrentOrigin = SpawnOrigin;
+	bPhaseWaitRegistered = false;
+	AttackTimer = 0.f;
+
+	if (Spawner)
+	{
+		// SetSequence() re-runs StartSequence(), resetting phase index,
+		// shot counter, spin angle, and phase timer back to phase 0.
+		Spawner->SetSequence(Spawner->Sequence);
+	}
+
+	// Stay paused — UpdateMovement will resume the spawner itself once it
+	// reaches the first attack point, same as on initial BeginPlay.
+	State = EEnemyState::Moving;
 }
