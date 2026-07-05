@@ -23,7 +23,6 @@
 		}
 	],
 	"TargetPlatforms": [
-		"Linux",
-		"Windows"
+		"Linux"
 	]
 }
