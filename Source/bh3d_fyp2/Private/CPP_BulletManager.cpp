@@ -192,15 +192,6 @@ void ACPP_BulletManager::ReturnAllBullets()
 }
 
 // ─── QueryBulletsAt ───────────────────────────────────────────────────────────
-//
-// CHANGED: array scan instead of a physics overlap. We already have every
-// active bullet's UBulletMovementComponent in ActiveComponents — GetOwner()
-// gives the actor, GetActorLocation() gives its position. No physics body,
-// no collision channel, no ActorTag check needed.
-//
-// If your bullets have different sizes, add a HitRadius field to
-// FBulletMotionParams and read it off MC->MotionParams here instead of
-// using a single flat Radius for every bullet.
 
 void ACPP_BulletManager::QueryBulletsAt(const FVector&        Centre,
                                          float                 Radius,
@@ -208,9 +199,6 @@ void ACPP_BulletManager::QueryBulletsAt(const FVector&        Centre,
 {
     OutBullets.Reset();
 
-    // CHANGED: add BulletHitRadius so a bullet's edge (not just its exact
-    // centre point) counts as reaching the query sphere — approximates the
-    // reach the old box-vs-sphere overlap gave for free.
     const float CombinedRadius = Radius + BULLET_HIT_RADIUS;
     const float RadiusSq       = CombinedRadius * CombinedRadius;
 
