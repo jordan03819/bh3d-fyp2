@@ -103,6 +103,24 @@ protected:
     FVector Velocity = FVector::ZeroVector;
 
     /**
+     * Cached unit-length travel direction, tracked independently of Velocity.
+     *
+     * Velocity's own magnitude shrinks to exactly zero once CurrentSpeed
+     * decelerates to 0 (see LinearAcceleration). Re-deriving direction by
+     * normalizing Velocity itself (as this used to do via GetUnsafeNormal)
+     * produces NaN the instant Velocity is the zero vector, since
+     * GetUnsafeNormal has no zero-length guard. That NaN then poisons the
+     * bullet's position permanently — world border culling and player-hit
+     * distance checks both silently evaluate to false against NaN, so the
+     * bullet never returns to the pool.
+     *
+     * Keeping direction here, decoupled from magnitude, means it stays
+     * valid even when CurrentSpeed (and therefore Velocity) is zero.
+     */
+    UPROPERTY(BlueprintReadOnly, Category="BulletSystem|Movement")
+    FVector CurrentDirection = FVector::ForwardVector;
+
+    /**
      * Cached scalar speed (cm/s) — kept in sync with Velocity to avoid
      * a Velocity.Size() sqrt call every tick.
      * Subclasses: if you modify Velocity directly, also update CurrentSpeed.

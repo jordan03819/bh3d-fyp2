@@ -31,8 +31,9 @@ void UBulletMovementComponent::Initialize(const FBulletMotionParams& Params)
     if (AActor* Owner = GetOwner())
     {
         // CHANGED: also cache CurrentSpeed so UpdateMotion never calls Velocity.Size().
-        CurrentSpeed = MotionParams.InitialSpeed;
-        Velocity     = Owner->GetActorForwardVector() * CurrentSpeed;
+        CurrentSpeed     = MotionParams.InitialSpeed;
+        CurrentDirection = Owner->GetActorForwardVector().GetSafeNormal();
+        Velocity         = CurrentDirection * CurrentSpeed;
     }
 
     // CHANGED: no longer enables component tick here — BulletManager::FireBullet
@@ -47,10 +48,11 @@ void UBulletMovementComponent::ResetForPool()
     // CHANGED: no tick to disable here anymore — BulletManager::DeactivateEntry
     // removes this component from ActiveComponents, which stops UpdateMotion
     // calls immediately.
-    Velocity     = FVector::ZeroVector;
-    CurrentSpeed = 0.f;
-    ElapsedTime  = 0.f;
-    bInitialized = false;
+    Velocity         = FVector::ZeroVector;
+    CurrentDirection = FVector::ForwardVector;
+    CurrentSpeed     = 0.f;
+    ElapsedTime      = 0.f;
+    bInitialized     = false;
 }
 
 void UBulletMovementComponent::UpdateMotion_Implementation(float DeltaTime)
@@ -98,20 +100,29 @@ void UBulletMovementComponent::UpdateMotion_Implementation(float DeltaTime)
     if (!MotionParams.AngularVelocity.IsZero())
     {
         FRotator FrameRot = MotionParams.AngularVelocity * DeltaTime;
-        // CHANGED: Velocity.GetSafeNormal() dropped from the else branch (was a
-        // wasted sqrt when no rotation). Here it's still needed to get the unit
-        // direction before rotating, but only runs on the angular-velocity path.
-        FVector Dir = FrameRot.RotateVector(Velocity.GetSafeNormal());
-        Velocity    = Dir * CurrentSpeed;
+        // CHANGED: rotate the cached CurrentDirection (always unit length),
+        // not Velocity itself. Velocity's magnitude collapses to exactly
+        // zero once CurrentSpeed decelerates to 0, and normalizing a zero
+        // vector is undefined — see CurrentDirection's declaration comment.
+        CurrentDirection = FrameRot.RotateVector(CurrentDirection).GetSafeNormal();
+        Velocity         = CurrentDirection * CurrentSpeed;
     }
     else
     {
-        // No rotation — direction is fixed. Reapply speed to the existing direction
-        // using the cached CurrentSpeed, no normalise needed.
-        // Previously: Velocity = Velocity.GetSafeNormal() * Speed;  ← sqrt every frame
-        Velocity = Velocity.GetUnsafeNormal() * CurrentSpeed;
-        // GetUnsafeNormal is safe here: Velocity was set from a valid direction in
-        // Initialize() and only ever scaled, never zeroed in this code path.
+        // No rotation — direction is fixed. Reapply speed to the cached
+        // CurrentDirection, which stays valid (unit length) regardless of
+        // what CurrentSpeed has decayed to.
+        //
+        // FIXED: this used to do Velocity = Velocity.GetUnsafeNormal() * CurrentSpeed.
+        // Once a decelerating bullet's CurrentSpeed clamped to exactly 0, Velocity
+        // itself became the zero vector, and GetUnsafeNormal() on a zero vector
+        // computes 0 * InvSqrt(0) = NaN (GetUnsafeNormal has no zero-length guard,
+        // unlike GetSafeNormal). That NaN then poisoned NewLocation below forever:
+        // NaN comparisons always evaluate false, so neither the world border cull
+        // nor QueryBulletsAt's player-distance check could ever catch the bullet
+        // again, permanently leaking its pool slot. Tracking direction separately
+        // from magnitude avoids ever normalizing a zero vector.
+        Velocity = CurrentDirection * CurrentSpeed;
     }
 
     // ── Position + Rotation ───────────────────────────────────────────────
